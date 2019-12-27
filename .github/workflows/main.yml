@@ -26,6 +26,7 @@ jobs:
           mkdir tmp
           find styleguides/clean-abap \( -name "*.md" \) -exec cp --parents {} tmp \;
           mv tmp/styleguides/clean-abap/* docs/
+          mv docs/CleanABAP.md docs/index.md
           git add .          
           git commit -am "New release version"
           git push
