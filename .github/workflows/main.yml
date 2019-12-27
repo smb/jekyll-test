@@ -25,7 +25,7 @@ jobs:
           git clone "https://github.com/SAP/styleguides" styleguides && cd styleguides
           mkdir tmp
           find styleguides/clean-abap \( -name "*.md" \) -exec cp --parents {} tmp \;
-          mv tmp/styleguides/clean-abap/* src
+          mv tmp/styleguides/clean-abap/* docs/source
           git add .          
           git commit -am "New release version"
           git push
