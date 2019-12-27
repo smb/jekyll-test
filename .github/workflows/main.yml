@@ -22,5 +22,10 @@ jobs:
           git config --global user.email 'sb@sbuehl.com'
           git remote set-url origin https://x-access-token:${{ secrets.REPO_SCOPED_TOKEN }}@github.com/$GITHUB_REPOSITORY
           git checkout "${GITHUB_REF:11}"
+          git clone "https://github.com/SAP/styleguides" styleguides && cd styleguides
+          mkdir tmp
+          find styleguides/clean-abap \( -name "*.md" \) -exec cp --parents {} tmp \;
+          mv tmp/styleguides/clean-abap/* src
+          git add .          
           git commit -am "New release version"
           git push
