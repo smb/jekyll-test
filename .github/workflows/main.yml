@@ -2,7 +2,7 @@ on:
   schedule:
     - cron:  '0 10 * * *'
   issue_comment:
-    - types: [created, edited]      
+    types: [created, edited]
 jobs:
   get-version:
     runs-on: ubuntu-latest
