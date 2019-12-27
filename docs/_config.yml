@@ -22,9 +22,6 @@ kramdown:
     block:
       line_numbers: false
 
-source: source
-destination: docs
-
 plugins:
   - jekyll-paginate
   - jekyll-sitemap
