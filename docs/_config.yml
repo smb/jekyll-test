@@ -1,0 +1,34 @@
+title: SAP Clean Code
+
+url: "https://github.com/SAP/styleguides"
+
+highlighter: rouge
+
+author:
+  name: SAP
+
+defaults:
+  -
+    scope:
+      path: "" 
+    values:
+      layout: "default"
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge 
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false
+
+source: source
+destination: docs
+
+plugins:
+  - jekyll-paginate
+  - jekyll-sitemap
+  - jekyll-optional-front-matter
+  - jekyll-titles-from-headings
+  - jekyll-default-layout
+  - jekyll-relative-links

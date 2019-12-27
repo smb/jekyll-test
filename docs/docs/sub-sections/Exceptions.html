@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+
+  <title>Exceptions</title>
+
+  <meta name="author" content="SAP" />
+
+  
+
+  <link rel="alternate" type="application/rss+xml" title="SAP Clean Code  " href="http://0.0.0.0:4000/feed.xml" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/styles/default.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/richleland/pygments-css@latest/friendly.css">
+
+</head>
+
+
+  <body>
+
+    <div role="main" class="container main-content">
+      <div class="intro-header"></div>
+
+<div role="main" class="container">
+  <h1 id="exceptions">Exceptions</h1>
+
+<p>What type of exception to use for what is a hot topic
+that has been discussed controversially
+across time and programming languages.</p>
+
+<h2 id="the-ideal">The Ideal</h2>
+
+<p>According to discussions in the community,
+the optimal way to deal with exceptions would be as follows.</p>
+
+<p>First, we want to declare the exception in
+the <code class="highlighter-rouge">lower_method</code> that actually throws it,
+to not surprise callers:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">METHODS</span> <span class="n">lower_method</span>
+  <span class="k">RAISING</span>
+    <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">flexible_exception</span><span class="p">.</span>
+
+<span class="k">METHOD</span> <span class="n">lower_method</span><span class="p">.</span>
+  <span class="k">RAISE</span> <span class="k">EXCEPTION</span> <span class="k">NEW</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">flexible_exception</span><span class="p">(</span> <span class="p">).</span>
+<span class="k">ENDMETHOD</span><span class="p">:</span>
+</code></pre></div></div>
+
+<p>Then we want to let the exception bubble upwards through <code class="highlighter-rouge">middle_method</code>s
+without forcing them to redeclare or catch the exception,
+to avoid refactoring cascades if exceptions change:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">METHODS</span> <span class="n">middle_method</span><span class="p">.</span>
+
+<span class="k">METHOD</span> <span class="n">middle_method</span><span class="p">.</span>
+  <span class="n">lower_method</span><span class="p">(</span> <span class="p">).</span>
+<span class="k">ENDMETHOD</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>Finally, we want to catch the exception in some <code class="highlighter-rouge">upper_method</code> and handle it.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">METHODS</span> <span class="n">upper_method</span><span class="p">.</span>
+
+<span class="k">METHOD</span> <span class="n">upper_method</span><span class="p">.</span>
+  <span class="k">TRY</span><span class="p">.</span>
+      <span class="n">middle_method</span><span class="p">(</span> <span class="p">).</span>
+    <span class="k">CATCH</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">flexible_exception</span><span class="p">.</span>
+      <span class="c1">" ...</span>
+  <span class="k">ENDTRY</span><span class="p">.</span>
+<span class="k">ENDMETHOD</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>This is also exactly what Robert C. Martin advertises for Java,
+where this pattern can be implemented with <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/RuntimeException.html">unchecked exceptions</a>.</p>
+
+<h2 id="whats-in-the-way">What’s in the Way</h2>
+
+<p>Excactly this ideal way is not possible in ABAP
+because none of the available three exception types supports it:</p>
+
+<h3 id="why-cx_static_check-doesnt-help">Why CX_STATIC_CHECK Doesn’t Help</h3>
+
+<p><code class="highlighter-rouge">cx_static_check</code> would force <code class="highlighter-rouge">middle_method</code>
+to redeclare the <code class="highlighter-rouge">/clean/flexible_exception</code>.
+Although the syntax check throws “only” a warning,
+the ABAP Test Cockpit responds with an issue with Very High priority
+that will prevent transport release in standard system setups.</p>
+
+<p>Even if we were willing to accept these warnings,
+without redeclaring <code class="highlighter-rouge">/clean/flexible_exception</code>,
+<code class="highlighter-rouge">middle_method</code> would not forward it 
+but trigger a <code class="highlighter-rouge">cx_sy_no_handler</code> exception
+which ultimately leads to a dump.</p>
+
+<h3 id="why-cx_dynamic_check-doesnt-help">Why CX_DYNAMIC_CHECK Doesn’t Help</h3>
+
+<p><code class="highlighter-rouge">cx_dynamic_check</code> doesn’t improve this.
+Alhough it makes the syntax check accept the missing redeclaration
+and catch block in <code class="highlighter-rouge">middle_method</code>,
+the code will still trigger <code class="highlighter-rouge">cx_sy_no_handler</code>
+if the exception is actually thrown.</p>
+
+<h3 id="why-cx_no_check-doesnt-help">Why CX_NO_CHECK Doesn’t Help</h3>
+
+<p><code class="highlighter-rouge">cx_no_check</code> also doesn’t help.
+Although it makes the method bodies work,
+the <code class="highlighter-rouge">METHODS lower_method</code> definition now is
+no longer allowed to declare <code class="highlighter-rouge">/clean/flexible_exception</code>
+and compilation fails with a syntax error.</p>
+
+<h3 id="why-cx_sy_no_handler-doesnt-help">Why CX_SY_NO_HANDLER Doesn’t Help</h3>
+
+<p>Catching the special exception <code class="highlighter-rouge">cx_sy_no_handler</code>
+is a workaround that appears to get pretty near to the ideal way,
+but also adds some imperfections that make it hard to recommend it:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">METHOD</span> <span class="n">upper_method</span><span class="p">.</span>
+  <span class="k">TRY</span><span class="p">.</span>
+      <span class="n">middle_method</span><span class="p">(</span> <span class="p">).</span>
+    <span class="k">CATCH</span> <span class="n">cx_sy_no_handler</span> <span class="k">INTO</span> <span class="k">DATA</span><span class="p">(</span><span class="k">outer</span><span class="p">).</span>
+      <span class="k">DATA</span><span class="p">(</span><span class="k">inner</span><span class="p">)</span> <span class="o">=</span> <span class="k">outer</span><span class="o">-&gt;</span><span class="n">previous</span><span class="p">.</span>
+      <span class="c1">" identify and branch on inner's type</span>
+  <span class="k">ENDTRY</span><span class="p">.</span>
+<span class="k">ENDMETHOD</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">cx_sy_no_handler</code> prevents using multiple <code class="highlighter-rouge">catch</code> branches
+to handle different exceptions in different ways.</p>
+
+<p>The code required to identify the actual exception -
+either a series of trial-and-error casts,
+or an <a href="https://help.sap.com/doc/abapdocu_752_index_htm/7.52/en-US/abenrtti.htm">RTTI</a> request for the class name, followed by case branches -
+is rather bulky and repetitive.</p>
+
+<p>Catching <code class="highlighter-rouge">cx_sy_no_handler</code> everywhere also dilutes its original purpose -
+to allow frameworks to handle bad plug-in code -
+a case that you then may have to handle differently.</p>
+
+<h2 id="compromises">Compromises</h2>
+
+<p>Community discussions suggest that
+people rather accept refactoring cascades
+than being surprised by undeclared exceptions.
+As a consequence, we suggest to prefer checked exceptions
+to unchecked ones in the way described in the guide.</p>
+
+<p>A different sort of compromise is the mixed-case scenario:
+use unchecked exceptions for <em>internal</em> methods
+that are fully under your team’s control
+and where people anticipate them,
+and resort to checked exceptions for <em>borderline</em> methods
+that may be called from other stakeholders,
+to clearly communicate where something can go wrong.</p>
+
+</div>
+
+    </div>
+
+    <footer class="footer-min">
+  <div class="text-muted">
+	SAP
+	&nbsp;&nbsp;&bull;&nbsp;&nbsp;
+	
+	  2019
+	
+
+    
+  </div>
+</footer>
+
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<!--
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/sb-sap/highlightjs-sap-abap@v0.1.1/src/abap.js"></script>
+-->
+<!-- <script src="https://cdn.jsdelivr.net/gh/highlightjs/highlightjs-sap-abap@latest/src/abap.js"></script> -->
+<!--<script src="https://raw.githubusercontent.com/sb-sap/highlightjs-sap-abap/master/src/abap.js"></script> -->
+<script>
+//	hljs.initHighlightingOnLoad();
+</script>
+
+
+  </body>
+</html>

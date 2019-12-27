@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+
+  <title>Upper vs. Lower Case</title>
+
+  <meta name="author" content="SAP" />
+
+  
+
+  <link rel="alternate" type="application/rss+xml" title="SAP Clean Code  " href="http://0.0.0.0:4000/feed.xml" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/styles/default.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/richleland/pygments-css@latest/friendly.css">
+
+</head>
+
+
+  <body>
+
+    <div role="main" class="container main-content">
+      <div class="intro-header"></div>
+
+<div role="main" class="container">
+  <h1 id="upper-vs-lower-case">Upper vs. Lower Case</h1>
+
+<blockquote>
+  <p><a href="/CleanABAP.html">Back to the guide</a></p>
+</blockquote>
+
+<p>We don’t have clear guidance on
+whether keywords and identifiers should be uppercased or not.</p>
+
+<p>General perception is that we should lowercase keywords
+and put identifiers in camel case.
+This is the prevalent formatting in most modern programming languages
+and commonly perceived as concise and readable style.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">data</span> <span class="n">maxWaitTimeInSeconds</span> <span class="k">type</span> <span class="k">i</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>One of the reasons behind this is that the human eye parses mixed and
+lower case faster than upper case, probably due to the more varied
+and thus easier to distinguish shapes of the letters.</p>
+
+<p>However, ABAP is case-insensitive,
+such that camel-casing identifiers remains a mere optical improvement
+that gets lost when pretty-printing and moving the code to the database.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">MAXWAITTIMEINSECONDS</span>
+</code></pre></div></div>
+
+<p>In response to this, ABAPers decided decades ago to prefer snake case
+to camel case, which at least preserves the word borders.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">max_wait_time_in_seconds</span>
+<span class="n">MAX_WAIT_TIME_IN_SECONDS</span>
+</code></pre></div></div>
+
+<p>At the same time, they decided to uppercase ABAP keywords
+to make them easier to spot
+in black-and-white printouts and on monochrome displays.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span> <span class="n">max_wait_time_in_seconds</span> <span class="k">TYPE</span> <span class="k">i</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>Even though large color screens invalidated part of these arguments,
+the keywords-uppercase-identifiers-lowercase format
+turned into a de facto standard that rules
+a vast majority of ABAP’s global code base.</p>
+
+<p>The <a href="https://help.sap.com/doc/abapdocu_751_index_htm/7.51/en-US/index.htm?file=abenlower_upper_case_guidl.htm">section <em>Case</em> in the ABAP Programming Guidelines</a>
+follows this de facto standard.</p>
+
+<p>The <a href="https://help.sap.com/doc/abapdocu_751_index_htm/7.51/en-US/index.htm?file=abenuse_pretty_printer_guidl.htm">section <em>Using Pretty Printer</em> in the ABAP Programming Guidelines</a>
+contradicts and says the recommendation <em>should</em> actually be lowercase keywords and uppercase identifiers.
+We do see foundation code that prefers lowercased keywords.</p>
+
+<p>In summary, we can only recommend teams to discuss this
+and agree on one common style.</p>
+
+</div>
+
+    </div>
+
+    <footer class="footer-min">
+  <div class="text-muted">
+	SAP
+	&nbsp;&nbsp;&bull;&nbsp;&nbsp;
+	
+	  2019
+	
+
+    
+  </div>
+</footer>
+
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<!--
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/sb-sap/highlightjs-sap-abap@v0.1.1/src/abap.js"></script>
+-->
+<!-- <script src="https://cdn.jsdelivr.net/gh/highlightjs/highlightjs-sap-abap@latest/src/abap.js"></script> -->
+<!--<script src="https://raw.githubusercontent.com/sb-sap/highlightjs-sap-abap/master/src/abap.js"></script> -->
+<script>
+//	hljs.initHighlightingOnLoad();
+</script>
+
+
+  </body>
+</html>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url>
+<loc>http://0.0.0.0:4000/CleanABAP.html</loc>
+</url>
+<url>
+<loc>http://0.0.0.0:4000/CleanABAP_en_US_sappsd.html</loc>
+</url>
+<url>
+<loc>http://0.0.0.0:4000/cheat-sheet/CheatSheet.html</loc>
+</url>
+<url>
+<loc>http://0.0.0.0:4000/sub-sections/AvoidEncodings.html</loc>
+</url>
+<url>
+<loc>http://0.0.0.0:4000/sub-sections/Enumerations.html</loc>
+</url>
+<url>
+<loc>http://0.0.0.0:4000/sub-sections/Exceptions.html</loc>
+</url>
+<url>
+<loc>http://0.0.0.0:4000/sub-sections/FunctionGroupsVsClasses.html</loc>
+</url>
+<url>
+<loc>http://0.0.0.0:4000/sub-sections/InterfacesVsAbstractClasses.html</loc>
+</url>
+<url>
+<loc>http://0.0.0.0:4000/sub-sections/ModernABAPLanguageElements.html</loc>
+</url>
+<url>
+<loc>http://0.0.0.0:4000/sub-sections/UpperVsLowerCase.html</loc>
+</url>
+</urlset>

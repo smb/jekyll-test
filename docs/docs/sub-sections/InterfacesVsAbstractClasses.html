@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+
+  <title>Interfaces vs. Abstract Classes</title>
+
+  <meta name="author" content="SAP" />
+
+  
+
+  <link rel="alternate" type="application/rss+xml" title="SAP Clean Code  " href="http://0.0.0.0:4000/feed.xml" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/styles/default.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/richleland/pygments-css@latest/friendly.css">
+
+</head>
+
+
+  <body>
+
+    <div role="main" class="container main-content">
+      <div class="intro-header"></div>
+
+<div role="main" class="container">
+  <h1 id="interfaces-vs-abstract-classes">Interfaces vs. Abstract Classes</h1>
+
+<p>Although interfaces and abstract classes share some properties,
+they are not equivalent and you should not treat one
+as an alternative for the other.</p>
+
+<p>Interfaces are there to share definitions.
+They specify how things are supposed to interact,
+without imposing any expectations
+what the implementation should look like.</p>
+
+<p>Abstract classes are there to share implementations.
+They also specify interaction,
+but in a way that already plots a path how to implement it,
+probably even assisting that implementation with code.</p>
+
+<p>Instead of asking <em>“should I use an interface or an abstract class?”</em>,
+usually the clean way will be to state that <em>“I will use an interface”</em>,
+followed by the question <em>“should I use an abstract class to implement it?”</em>.</p>
+
+<h2 id="interfaces">Interfaces</h2>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">INTERFACE</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">blog_post</span><span class="p">.</span>
+  <span class="k">PUBLIC</span><span class="p">.</span>
+    <span class="k">METHODS</span> <span class="n">publish</span><span class="p">.</span>
+<span class="k">ENDINTERFACE</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>Interfaces allow connecting any kind of code,
+as long as it satisfies the interface.</p>
+
+<p>They don’t impose any
+side expectations or restrictions upon the implementation.</p>
+
+<p>In turn, they don’t help implementing the required methods
+with default code or helper methods.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CLASS</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">markdown_blog_post</span> <span class="k">DEFINITION</span> <span class="k">PUBLIC</span> <span class="k">CREATE</span> <span class="k">PUBLIC</span><span class="p">.</span>
+  <span class="k">PUBLIC</span> <span class="k">SECTION</span><span class="p">.</span>
+    <span class="k">INTERFACES</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">blog_post</span><span class="p">.</span>
+<span class="k">ENDCLASS</span><span class="p">.</span>
+
+<span class="k">CLASS</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">markdown_blog_post</span> <span class="k">IMPLEMENTATION</span><span class="p">.</span>
+  
+  <span class="k">METHOD</span> <span class="n">publish</span><span class="p">.</span>
+  <span class="k">ENDMETHOD</span><span class="p">.</span>
+  
+<span class="k">ENDCLASS</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p><img src="interfaces-vs-abstract-classes/InterfacesVsAbstractClasses-Interface.png" alt="" /></p>
+
+<blockquote>
+  <p><strong>Class diagram.</strong>
+The <code class="highlighter-rouge">BlogPost</code> interface has two alternative
+implementations <code class="highlighter-rouge">MarkdownBlogPost</code> and <code class="highlighter-rouge">HTMLBlogPost</code>.
+Both fulfill the same “contract”, specified by  <code class="highlighter-rouge">BlogPost</code>,
+but don’t share any code.</p>
+</blockquote>
+
+<h2 id="abstract-classes">Abstract classes</h2>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CLASS</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">blog_post</span> <span class="k">DEFINITION</span> <span class="k">PUBLIC</span> <span class="k">ABSTRACT</span> <span class="k">CREATE</span> <span class="k">PROTECTED</span><span class="p">.</span>
+  <span class="k">PUBLIC</span> <span class="k">SECTION</span><span class="p">.</span>
+    <span class="k">METHODS</span> <span class="n">publish</span> <span class="k">ABSTRACT</span><span class="p">.</span>
+<span class="k">ENDCLASS</span><span class="p">.</span>
+
+<span class="k">CLASS</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">blog_post</span> <span class="k">IMPLEMENTATION</span><span class="p">.</span>
+<span class="k">ENDCLASS</span><span class="p">.</span>
+</code></pre></div></div>
+<p>An abstract class differs from regular classes in that it can’t be instantiated. Only 
+sub-classes of the abstract class can be instantiated. An abstract class should contain 
+at least one abstract method. An abstract method is declared in the abstract class, 
+and then implemented in the sub-classes of the abstract class.</p>
+
+<p>Abstract classes allow connecting only code that
+fits the inheritance pattern.</p>
+
+<p>On the one hand, they unify code and design across objects-of-a-kind,
+making it easier to implement things by providing default implementations,
+frames, and helper methods.</p>
+
+<p>On the other hand, they squeeze sub-classes into their predefined scheme,
+and force them to accept any code they provide.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CLASS</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">markdown_blog_post</span> <span class="k">DEFINITION</span>
+    <span class="k">PUBLIC</span> <span class="k">CREATE</span> <span class="k">PUBLIC</span>
+    <span class="k">INHERITING</span> <span class="k">FROM</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">blog_post</span><span class="p">.</span>
+  <span class="k">PUBLIC</span> <span class="k">SECTION</span><span class="p">.</span>
+    <span class="k">METHODS</span> <span class="n">constructor</span><span class="p">.</span>
+    <span class="k">METHODS</span> <span class="n">publish</span> <span class="k">REDEFINITION</span><span class="p">.</span>
+<span class="k">ENDCLASS</span><span class="p">.</span>
+
+<span class="k">CLASS</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">markdown_blog_post</span> <span class="k">IMPLEMENTATION</span><span class="p">.</span>
+
+  <span class="k">METHOD</span> <span class="n">constructor</span><span class="p">.</span>
+    <span class="n">super</span><span class="o">-&gt;</span><span class="n">constructor</span><span class="p">(</span> <span class="p">).</span>
+  <span class="k">ENDMETHOD</span><span class="p">.</span>
+  
+  <span class="k">METHOD</span> <span class="n">publish</span><span class="p">.</span>
+  <span class="k">ENDMETHOD</span><span class="p">.</span>
+  
+<span class="k">ENDCLASS</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p><img src="interfaces-vs-abstract-classes/InterfacesVsAbstractClasses-AbstractClass.png" alt="" /></p>
+
+<blockquote>
+  <p><strong>Class diagram.</strong>
+The abstract class <code class="highlighter-rouge">BlogPost</code> has two sub-classes
+<code class="highlighter-rouge">MarkdownBlogPost</code> and <code class="highlighter-rouge">HTMLBlogPost</code>.
+Both fit into the “frame” specified by <code class="highlighter-rouge">BlogPost</code>,
+probably inheriting some methods and attributes from their super-class.</p>
+</blockquote>
+
+<h2 id="comparison">Comparison</h2>
+
+<ul>
+  <li>
+    <p>An abstract class needs more code
+because you always have to provide an <code class="highlighter-rouge">IMPLEMENTATION</code>,
+even if it is completely empty.</p>
+  </li>
+  <li>
+    <p>An abstract class can reduce the amount of code needed by providing 
+a default behavior in a non-abstract method. If such a method 
+would have been part of the interface, it would have to be 
+implemented separately for each class implementing the interface.</p>
+  </li>
+  <li>
+    <p>A class can implement multiple interfaces,
+but can inherit only one interface-like abstract class. Remember to 
+<a href="/CleanABAP.html#prefer-composition-to-inheritance">favor composition over inheritance</a>, though.</p>
+  </li>
+  <li>
+    <p>Inheriting from the interface-like abstract class
+disables inheriting from other classes,
+preventing the sub-class from exploiting inheritance for other aspects.</p>
+  </li>
+  <li>
+    <p>Interfaces have no optional methods,
+such that adding a method requires you
+to adjust all implementations.</p>
+  </li>
+  <li>
+    <p>Interfaces provide only <code class="highlighter-rouge">PUBLIC</code> components,
+while abstract classes can provide <code class="highlighter-rouge">PROTECTED</code> parts as well,
+sharing something with the sub-class but not with the rest of the world.</p>
+  </li>
+  <li>
+    <p>Sub-class constructors must call <code class="highlighter-rouge">super-&gt;constructor( )</code>,
+even if the abstract class does not have a constructor.</p>
+  </li>
+  <li>
+    <p>The abstract class has power over the sub-class’s instantiation behavior,
+being able to suppress instantiation completely with <code class="highlighter-rouge">CREATE PRIVATE</code>.</p>
+  </li>
+  <li>
+    <p>The abstract class has power over the sub-class’s code,
+being able to add members and constructor code that may
+simplify but also interfere with or even break the sub-class’s code.</p>
+  </li>
+  <li>
+    <p>Unit testing is easier with interfaces,
+because they allow plugging in any kind of test double.
+Interface-like abstract classes require the test double
+to inherit the abstract class, probably involuntarily
+running code included in it, esp. its constructor.</p>
+  </li>
+</ul>
+
+<h2 id="combination">Combination</h2>
+
+<p>Instead of using abstract classes as alternative to interfaces,
+you should use both in combination to decouple dependencies.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">INTERFACE</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">blog_post</span><span class="p">.</span>
+  <span class="k">PUBLIC</span><span class="p">.</span>
+    <span class="k">METHODS</span> <span class="n">publish</span><span class="p">.</span>
+<span class="k">ENDINTERFACE</span><span class="p">.</span>
+</code></pre></div></div>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CLASS</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">formatted_blog_post</span> <span class="k">DEFINITION</span> <span class="k">PUBLIC</span> <span class="k">ABSTRACT</span> <span class="k">CREATE</span> <span class="k">PROTECTED</span><span class="p">.</span>
+  <span class="k">PUBLIC</span> <span class="k">SECTION</span><span class="p">.</span>
+    <span class="k">INTERFACES</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">blog_post</span><span class="p">.</span>
+<span class="k">ENDCLASS</span><span class="p">.</span>
+
+<span class="k">CLASS</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">formatted_blog_post</span> <span class="k">IMPLEMENTATION</span><span class="p">.</span>
+
+  <span class="k">METHOD</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">blog_post</span><span class="o">~</span><span class="n">publish</span><span class="p">.</span>
+    <span class="c1">" default implementation</span>
+    <span class="c1">" sub-classes can use it</span>
+    <span class="c1">" or override the method with something else</span>
+  <span class="k">ENDMETHOD</span><span class="p">.</span>
+  
+<span class="k">ENDCLASS</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p><img src="interfaces-vs-abstract-classes/InterfacesVsAbstractClasses-Combined.png" alt="" /></p>
+
+<blockquote>
+  <p><strong>Class diagram.</strong>
+The interface <code class="highlighter-rouge">BlogPost</code> specifies the “contract”
+that all blog posts will fulfill.
+The developers decided to use an inheritance scheme to implement
+different “flavors” of blog posts,
+using an abstract class <code class="highlighter-rouge">FormattedBlogPost</code> with two sub-classes
+<code class="highlighter-rouge">MarkdownBlogPost</code> and <code class="highlighter-rouge">HTMLBlogPost</code>.</p>
+</blockquote>
+
+</div>
+
+    </div>
+
+    <footer class="footer-min">
+  <div class="text-muted">
+	SAP
+	&nbsp;&nbsp;&bull;&nbsp;&nbsp;
+	
+	  2019
+	
+
+    
+  </div>
+</footer>
+
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<!--
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/sb-sap/highlightjs-sap-abap@v0.1.1/src/abap.js"></script>
+-->
+<!-- <script src="https://cdn.jsdelivr.net/gh/highlightjs/highlightjs-sap-abap@latest/src/abap.js"></script> -->
+<!--<script src="https://raw.githubusercontent.com/sb-sap/highlightjs-sap-abap/master/src/abap.js"></script> -->
+<script>
+//	hljs.initHighlightingOnLoad();
+</script>
+
+
+  </body>
+</html>

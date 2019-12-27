@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+
+  <title>Enumerations</title>
+
+  <meta name="author" content="SAP" />
+
+  
+
+  <link rel="alternate" type="application/rss+xml" title="SAP Clean Code  " href="http://0.0.0.0:4000/feed.xml" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/styles/default.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/richleland/pygments-css@latest/friendly.css">
+
+</head>
+
+
+  <body>
+
+    <div role="main" class="container main-content">
+      <div class="intro-header"></div>
+
+<div role="main" class="container">
+  <h1 id="enumerations">Enumerations</h1>
+
+<blockquote>
+  <p><a href="/CleanABAP.html">Back to the guide</a></p>
+</blockquote>
+
+<p>ABAP does not support enumerations as natively and completely as
+other programming languages.</p>
+
+<p>ABAPers therefore were forced to think up their own solutions
+and came up with a set of <a href="#patterns">patterns</a> that can be
+found in the majority of today’s object-oriented ABAP code.</p>
+
+<p>When deciding for an enumeration pattern,
+or wanting to design one of your own,
+consider the <a href="#guidelines">guidelines</a>.</p>
+
+<ul>
+  <li><a href="#patterns">Patterns</a>
+    <ul>
+      <li><a href="#constant-pattern">Constant pattern</a></li>
+      <li><a href="#object-pattern">Object pattern</a></li>
+      <li><a href="#interface-pattern">Interface pattern</a></li>
+      <li><a href="#collection-pattern">Collection pattern</a></li>
+    </ul>
+  </li>
+  <li><a href="#guidelines">Guidelines</a>
+    <ul>
+      <li><a href="#use-one-development-object-per-enumeration">Use one development object per enumeration</a></li>
+      <li><a href="#prefer-classes-to-interfaces">Prefer classes to interfaces</a></li>
+      <li><a href="#try-to-enforce-type-safety">Try to enforce type safety</a></li>
+    </ul>
+  </li>
+  <li><a href="#what-about-enum">What about ENUM?</a></li>
+</ul>
+
+<h2 id="patterns">Patterns</h2>
+
+<blockquote>
+  <p><a href="#enumerations">Enumerations</a> &gt; <a href="#patterns">This section</a></p>
+</blockquote>
+
+<p>We recommend using either
+the <strong><a href="#constant-pattern">constant pattern</a></strong>
+or the <strong><a href="#object-pattern">object pattern</a></strong>
+because they combine most advantages
+and can be generally considered clean.</p>
+
+<p>The widely used <a href="#interface-pattern">interface pattern</a>
+is also acceptable, but has some slight drawbacks.</p>
+
+<p>Think twice before resorting to the
+<a href="#collection-pattern">collection pattern</a>.
+Although it has become widely spread through BOPF,
+and can be quite convenient in some scenarios,
+it harbors the danger of degrading into a mess.</p>
+
+<h3 id="constant-pattern">Constant Pattern</h3>
+
+<blockquote>
+  <p><a href="#enumerations">Enumerations</a> &gt; <a href="#patterns">Patterns</a> &gt; <a href="#constant-pattern">This section</a></p>
+</blockquote>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CLASS</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">message_severity</span> <span class="k">DEFINITION</span> <span class="k">PUBLIC</span> <span class="k">ABSTRACT</span> <span class="k">FINAL</span><span class="p">.</span>
+  <span class="k">PUBLIC</span> <span class="k">SECTION</span><span class="p">.</span>
+    <span class="k">CONSTANTS</span><span class="p">:</span>
+      <span class="k">warning</span> <span class="k">TYPE</span> <span class="n">symsgty</span> <span class="k">VALUE</span> <span class="s1">'W'</span><span class="p">,</span>
+      <span class="n">error</span>   <span class="k">TYPE</span> <span class="n">symsgty</span> <span class="k">VALUE</span> <span class="s1">'E'</span><span class="p">.</span>
+<span class="k">ENDCLASS</span><span class="p">.</span>
+
+<span class="k">CLASS</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">message_severity</span> <span class="k">IMPLEMENTATION</span><span class="p">.</span>
+<span class="k">ENDCLASS</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>used as</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">IF</span> <span class="n">log_contains</span><span class="p">(</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">message_severity</span><span class="o">=&gt;</span><span class="k">warning</span> <span class="p">).</span>
+</code></pre></div></div>
+
+<h3 id="object-pattern">Object Pattern</h3>
+
+<blockquote>
+  <p><a href="#enumerations">Enumerations</a> &gt; <a href="#patterns">Patterns</a> &gt; <a href="#object-pattern">This section</a></p>
+</blockquote>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CLASS</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">message_severity</span> <span class="k">DEFINITION</span> <span class="k">PUBLIC</span> <span class="k">CREATE</span> <span class="k">PRIVATE</span> <span class="k">FINAL</span><span class="p">.</span>
+
+  <span class="k">PUBLIC</span> <span class="k">SECTION</span><span class="p">.</span>
+
+    <span class="k">CLASS</span><span class="o">-</span><span class="k">DATA</span> <span class="k">warning</span> <span class="k">TYPE</span> <span class="k">REF</span> <span class="k">TO</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">message_severity</span> <span class="k">READ</span><span class="o">-</span><span class="k">ONLY</span><span class="p">,</span>
+    <span class="k">CLASS</span><span class="o">-</span><span class="k">DATA</span> <span class="n">error</span>   <span class="k">TYPE</span> <span class="k">REF</span> <span class="k">TO</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">message_severity</span> <span class="k">READ</span><span class="o">-</span><span class="k">ONLY</span><span class="p">.</span>
+
+    <span class="k">DATA</span> <span class="k">value</span> <span class="k">TYPE</span> <span class="n">symsgty</span> <span class="k">READ</span><span class="o">-</span><span class="k">ONLY</span><span class="p">.</span>
+
+    <span class="k">CLASS</span><span class="o">-</span><span class="k">METHODS</span> <span class="n">class_constructor</span><span class="p">.</span>
+    <span class="k">METHODS</span> <span class="n">constructor</span> <span class="k">IMPORTING</span> <span class="k">value</span> <span class="k">TYPE</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">severity</span><span class="p">.</span>
+
+<span class="k">ENDCLASS</span><span class="p">.</span>
+
+<span class="k">CLASS</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">message_severity</span> <span class="k">IMPLEMENTATION</span><span class="p">.</span>
+
+  <span class="k">METHOD</span> <span class="n">class_constructor</span><span class="p">.</span>
+    <span class="k">warning</span> <span class="o">=</span> <span class="k">NEW</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">message_severity</span><span class="p">(</span> <span class="s1">'W'</span> <span class="p">).</span>
+    <span class="n">error</span> <span class="o">=</span> <span class="k">NEW</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">message_severity</span><span class="p">(</span> <span class="s1">'E'</span> <span class="p">).</span>
+  <span class="k">ENDMETHOD</span><span class="p">.</span>
+
+  <span class="k">METHOD</span> <span class="n">constructor</span><span class="p">.</span>
+    <span class="n">me</span><span class="o">-&gt;</span><span class="k">value</span> <span class="o">=</span> <span class="k">value</span><span class="p">.</span>
+  <span class="k">ENDMETHOD</span><span class="p">.</span>
+
+<span class="k">ENDCLASS</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>used as</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">IF</span> <span class="n">log_contains</span><span class="p">(</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">message_severity</span><span class="o">=&gt;</span><span class="k">warning</span><span class="o">-&gt;</span><span class="k">value</span> <span class="p">).</span>
+</code></pre></div></div>
+
+<h3 id="interface-pattern">Interface Pattern</h3>
+
+<blockquote>
+  <p><a href="#enumerations">Enumerations</a> &gt; <a href="#patterns">Patterns</a> &gt; <a href="#interface-pattern">This section</a></p>
+</blockquote>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">" inferior pattern</span>
+<span class="k">INTERFACE</span> <span class="o">/</span><span class="n">dirty</span><span class="o">/</span><span class="n">message_severity</span><span class="p">.</span>
+  <span class="k">CONSTANTS</span><span class="p">:</span>
+    <span class="k">warning</span> <span class="k">TYPE</span> <span class="n">symsgty</span> <span class="k">VALUE</span> <span class="s1">'W'</span><span class="p">,</span>
+    <span class="n">error</span>   <span class="k">TYPE</span> <span class="n">symsgty</span> <span class="k">VALUE</span> <span class="s1">'E'</span><span class="p">.</span>
+<span class="k">ENDINTERFACE</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>used as</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">IF</span> <span class="n">log_contains</span><span class="p">(</span> <span class="o">/</span><span class="n">dirty</span><span class="o">/</span><span class="n">message_severity</span><span class="o">=&gt;</span><span class="k">warning</span> <span class="p">).</span>
+</code></pre></div></div>
+
+<h3 id="collection-pattern">Collection Pattern</h3>
+
+<blockquote>
+  <p><a href="#enumerations">Enumerations</a> &gt; <a href="#patterns">Patterns</a> &gt; <a href="#collection-pattern">This section</a></p>
+</blockquote>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">" inferior pattern</span>
+<span class="k">INTERFACE</span> <span class="o">/</span><span class="n">dirty</span><span class="o">/</span><span class="n">message_constants</span><span class="p">.</span>
+  <span class="k">CONSTANTS</span><span class="p">:</span>
+    <span class="k">BEGIN</span> <span class="k">OF</span> <span class="n">message_severity</span><span class="p">,</span>
+      <span class="k">warning</span> <span class="k">TYPE</span> <span class="n">symsgty</span> <span class="k">VALUE</span> <span class="s1">'W'</span><span class="p">,</span>
+      <span class="n">error</span>   <span class="k">TYPE</span> <span class="n">symsgty</span> <span class="k">VALUE</span> <span class="s1">'E'</span><span class="p">,</span>
+    <span class="k">END</span> <span class="k">OF</span> <span class="n">message_severity</span><span class="p">,</span>
+    <span class="k">BEGIN</span> <span class="k">OF</span> <span class="n">message_lifecycle</span><span class="p">,</span>
+      <span class="n">transitional</span> <span class="k">TYPE</span> <span class="k">i</span> <span class="k">VALUE</span> <span class="mi">1</span><span class="p">,</span>
+      <span class="n">persisted</span>    <span class="k">TYPE</span> <span class="k">i</span> <span class="k">VALUE</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="k">END</span> <span class="k">OF</span> <span class="n">message_lifecycle</span><span class="p">.</span>
+<span class="k">ENDINTERFACE</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>used as</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">IF</span> <span class="n">log_contains</span><span class="p">(</span> <span class="o">/</span><span class="n">dirty</span><span class="o">/</span><span class="n">message_constants</span><span class="o">=&gt;</span><span class="n">message_severity</span><span class="o">-</span><span class="k">warning</span> <span class="p">).</span>
+</code></pre></div></div>
+
+<h2 id="guidelines">Guidelines</h2>
+
+<blockquote>
+  <p><a href="#enumerations">Enumerations</a> &gt; <a href="#guidelines">This section</a></p>
+</blockquote>
+
+<h3 id="use-one-development-object-per-enumeration">Use one development object per enumeration</h3>
+
+<blockquote>
+  <p><a href="#enumerations">Enumerations</a> &gt; <a href="#guidelines">Guidelines</a> &gt; <a href="#use-one-development-object-per-enumeration">This section</a></p>
+</blockquote>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CLASS</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">message_severity</span> <span class="k">DEFINITION</span> <span class="k">PUBLIC</span> <span class="k">ABSTRACT</span> <span class="k">FINAL</span><span class="p">.</span>
+  <span class="k">PUBLIC</span> <span class="k">SECTION</span><span class="p">.</span>
+    <span class="k">CONSTANTS</span><span class="p">:</span>
+      <span class="k">warning</span> <span class="k">TYPE</span> <span class="n">symsgty</span> <span class="k">VALUE</span> <span class="s1">'W'</span><span class="p">,</span>
+      <span class="n">error</span>   <span class="k">TYPE</span> <span class="n">symsgty</span> <span class="k">VALUE</span> <span class="s1">'E'</span><span class="p">.</span>
+<span class="k">ENDCLASS</span><span class="p">.</span>
+
+<span class="k">CLASS</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">document_type</span> <span class="k">DEFINITION</span> <span class="k">PUBLIC</span> <span class="k">ABSTRACT</span> <span class="k">FINAL</span><span class="p">.</span>
+  <span class="k">PUBLIC</span> <span class="k">SECTION</span><span class="p">.</span>
+    <span class="k">CONSTANTS</span><span class="p">:</span>
+      <span class="n">sales_order</span>    <span class="k">TYPE</span> <span class="n">char02</span> <span class="k">VALUE</span> <span class="s1">'01'</span><span class="p">,</span>
+      <span class="n">purchase_order</span> <span class="k">TYPE</span> <span class="n">char02</span> <span class="k">VALUE</span> <span class="s1">'02'</span><span class="p">.</span>
+<span class="k">ENDCLASS</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>This simplifies searching for enumerations
+because you can search for the name of the development object
+instead of hassling with where-used lists and fulltext code searches.</p>
+
+<p>Effective search is important as observations suggest
+that being unable to find the required enumeration
+causes people to quickly create constants
+a second and third time in different places,
+violating the don’t-repeat-yourself principle.</p>
+
+<p>Separate development objects also improve cohesion of your classes
+because consumers depend only on exactly what they need,
+not some other enumerations that only accidentally happen
+to reside in the same development object.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">" anti-pattern</span>
+<span class="k">CLASS</span> <span class="o">/</span><span class="n">dirty</span><span class="o">/</span><span class="n">common_constants</span> <span class="k">DEFINITION</span> <span class="k">PUBLIC</span> <span class="k">ABSTRACT</span> <span class="k">FINAL</span><span class="p">.</span>
+  <span class="k">PUBLIC</span> <span class="k">SECTION</span><span class="p">.</span>
+    <span class="k">CONSTANTS</span><span class="p">:</span>
+      <span class="k">BEGIN</span> <span class="k">OF</span> <span class="n">message_severity</span><span class="p">,</span>
+        <span class="k">warning</span> <span class="k">TYPE</span> <span class="n">symsgty</span> <span class="k">VALUE</span> <span class="s1">'W'</span><span class="p">,</span>
+        <span class="n">error</span>   <span class="k">TYPE</span> <span class="n">symsgty</span> <span class="k">VALUE</span> <span class="s1">'E'</span><span class="p">,</span>
+      <span class="k">END</span> <span class="k">OF</span> <span class="n">message_severity</span><span class="p">,</span>
+      <span class="k">BEGIN</span> <span class="k">OF</span> <span class="n">document_type</span><span class="p">,</span>
+        <span class="n">sales_order</span>    <span class="k">TYPE</span> <span class="n">char02</span> <span class="k">VALUE</span> <span class="s1">'01'</span><span class="p">,</span>
+        <span class="n">purchase_order</span> <span class="k">TYPE</span> <span class="n">char02</span> <span class="k">VALUE</span> <span class="s1">'02'</span><span class="p">,</span>
+      <span class="k">END</span> <span class="k">OF</span> <span class="n">document_type</span><span class="p">.</span>
+<span class="k">ENDCLASS</span><span class="p">.</span>
+</code></pre></div></div>
+
+<h3 id="prefer-classes-to-interfaces">Prefer classes to interfaces</h3>
+
+<blockquote>
+  <p><a href="#enumerations">Enumerations</a> &gt; <a href="#guidelines">Guidelines</a> &gt; <a href="#prefer-classes-to-interfaces">This section</a></p>
+</blockquote>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CLASS</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">message_severity</span> <span class="k">DEFINITION</span> <span class="k">PUBLIC</span> <span class="k">ABSTRACT</span> <span class="k">FINAL</span><span class="p">.</span>
+  <span class="k">PUBLIC</span> <span class="k">SECTION</span><span class="p">.</span>
+    <span class="k">CONSTANTS</span><span class="p">:</span>
+      <span class="k">warning</span> <span class="k">TYPE</span> <span class="n">symsgty</span> <span class="k">VALUE</span> <span class="s1">'W'</span><span class="p">,</span>
+      <span class="n">error</span>   <span class="k">TYPE</span> <span class="n">symsgty</span> <span class="k">VALUE</span> <span class="s1">'E'</span><span class="p">.</span>
+<span class="k">ENDCLASS</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>Classes allow adding supportive methods,
+such as the often-encountered
+<code class="highlighter-rouge">is_valid</code>, <code class="highlighter-rouge">equals</code>, <code class="highlighter-rouge">contains</code>, and <code class="highlighter-rouge">to_string</code> methods,
+or enumeration-specific ones such as <code class="highlighter-rouge">is_more_severe_than</code>.</p>
+
+<p>They also provide a natural place for unit tests,
+especially if you added supportive methods,
+but also for common cases such as
+<code class="highlighter-rouge">in_sync_with_domain_fixed_vals</code>.</p>
+
+<p>Moreover, classes enforce clean object orientation
+through the additions <code class="highlighter-rouge">ABSTRACT</code> and <code class="highlighter-rouge">FINAL</code>.
+Interfaces tempt people to “implement” them.
+While this shortens their syntax by using the constants
+without a leading <code class="highlighter-rouge">/dirty/message_severity=&gt;</code>,
+this kind of “inheritance out of convenience”
+makes no sense in object orientation
+and should be avoided.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">" inferior pattern</span>
+<span class="k">INTERFACE</span> <span class="o">/</span><span class="n">dirty</span><span class="o">/</span><span class="n">message_severity</span><span class="p">.</span>
+  <span class="k">CONSTANTS</span><span class="p">:</span>
+    <span class="k">warning</span> <span class="k">TYPE</span> <span class="n">symsgty</span> <span class="k">VALUE</span> <span class="s1">'W'</span><span class="p">,</span>
+    <span class="n">error</span>   <span class="k">TYPE</span> <span class="n">symsgty</span> <span class="k">VALUE</span> <span class="s1">'E'</span><span class="p">.</span>
+<span class="k">ENDINTERFACE</span><span class="p">.</span>
+</code></pre></div></div>
+
+<h3 id="try-to-enforce-type-safety">Try to enforce type safety</h3>
+
+<blockquote>
+  <p><a href="#enumerations">Enumerations</a> &gt; <a href="#guidelines">Guidelines</a> &gt; <a href="#try-to-enforce-type-safety">This section</a></p>
+</blockquote>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">METHODS</span> <span class="n">log_contains</span>
+  <span class="k">IMPORTING</span>
+    <span class="n">minimum_severity</span> <span class="k">TYPE</span> <span class="k">REF</span> <span class="k">TO</span> <span class="o">/</span><span class="n">clean</span><span class="o">/</span><span class="n">message_severity</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>The real advantage of enumerations in other programming languages
+is not that they provide constants,
+but that they provide <em>all</em> constants,
+meaning they enforce type safety
+by making the compiler reject invalid values.</p>
+
+<p>Without type safety, you still get helpful constants
+but will find yourself repeating <code class="highlighter-rouge">is_valid( )</code> validations
+all over the place.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">" inferior pattern</span>
+<span class="k">METHODS</span> <span class="n">log_contains</span>
+  <span class="k">IMPORTING</span>
+    <span class="n">minimum_severity</span> <span class="k">TYPE</span> <span class="n">symsgty</span><span class="p">.</span>
+</code></pre></div></div>
+
+<h2 id="what-about-enum">What about ENUM?</h2>
+
+<blockquote>
+  <p><a href="#enumerations">Enumerations</a> &gt; <a href="#what-about-enum">This section</a></p>
+</blockquote>
+
+<p>So far we have not seen an efficient wide-spread pattern
+that exploits the ABAP keyword <code class="highlighter-rouge">ENUM</code>.
+We assume there are such patterns
+but that people haven’t explored them in depth so far.</p>
+
+<p>One of the problems with <code class="highlighter-rouge">ENUM</code> is that it
+does not only create constants,
+but also new data types alongside.
+This makes it harder to apply it to common cases
+where the data types already exist,
+especially communication with APIs and the database.</p>
+
+<p>If you know a good enum-based pattern,
+or designed one on your own,
+<a href="https://github.com/SAP/clean-abap/blob/master/CONTRIBUTING.md">let us know about it</a>.</p>
+
+</div>
+
+    </div>
+
+    <footer class="footer-min">
+  <div class="text-muted">
+	SAP
+	&nbsp;&nbsp;&bull;&nbsp;&nbsp;
+	
+	  2019
+	
+
+    
+  </div>
+</footer>
+
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<!--
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/sb-sap/highlightjs-sap-abap@v0.1.1/src/abap.js"></script>
+-->
+<!-- <script src="https://cdn.jsdelivr.net/gh/highlightjs/highlightjs-sap-abap@latest/src/abap.js"></script> -->
+<!--<script src="https://raw.githubusercontent.com/sb-sap/highlightjs-sap-abap/master/src/abap.js"></script> -->
+<script>
+//	hljs.initHighlightingOnLoad();
+</script>
+
+
+  </body>
+</html>

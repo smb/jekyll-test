@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+
+  <title>Modern ABAP Language Elements</title>
+
+  <meta name="author" content="SAP" />
+
+  
+
+  <link rel="alternate" type="application/rss+xml" title="SAP Clean Code  " href="http://0.0.0.0:4000/feed.xml" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/styles/default.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/richleland/pygments-css@latest/friendly.css">
+
+</head>
+
+
+  <body>
+
+    <div role="main" class="container main-content">
+      <div class="intro-header"></div>
+
+<div role="main" class="container">
+  <h1 id="modern-abap-language-elements">Modern ABAP Language Elements</h1>
+
+<p>As the ABAP language evolves,
+new features often go unnoticed by developers.
+This document highlights some of the additions
+that improve readability of the code
+and therefore should be in the tool set
+of any professional ABAPer.</p>
+
+<p>The new ABAP statements are only outlined in short;
+refer to the ABAP online documentation for more details.</p>
+
+<h2 id="content">Content</h2>
+
+<ul>
+  <li><a href="#functional-statements-and-expressions-in-abap">Functional statements and expressions in ABAP</a></li>
+  <li><a href="#inline-declaration-of-variables">Inline declaration of variables</a></li>
+  <li><a href="#compound-assignment-operators">Compound Assignment Operators</a></li>
+  <li><a href="#non-initial-conditions">Non-Initial Conditions</a></li>
+  <li><a href="#enumerations">Enumerations</a></li>
+  <li><a href="#internal-tables">Internal Tables</a>
+    <ul>
+      <li><a href="#count-table-lines">Count lines</a></li>
+      <li><a href="#check-existence-of-a-table-line">Check existence of a table line</a></li>
+      <li><a href="#access-table-key-with-uncertain-result">Access table key with uncertain result</a></li>
+      <li><a href="#access-table-index">Access table index</a></li>
+    </ul>
+  </li>
+  <li><a href="#conditions">Conditions</a>
+    <ul>
+      <li><a href="#conditional-distinction">Conditional distinction</a></li>
+      <li><a href="#case-distinction">Case distinction</a></li>
+      <li><a href="#case-distinctions-of-reference-types-class-and-interface">Case distinctions of reference types class and interface</a></li>
+    </ul>
+  </li>
+  <li><a href="#conversions">Conversions</a>
+    <ul>
+      <li><a href="#cast-data-references">Cast data references</a></li>
+      <li><a href="#create-data-references">Create data references</a></li>
+      <li><a href="#convert-data-types">Convert data types</a></li>
+      <li><a href="#copy-fields-with-matching-names">Copy fields with matching names</a></li>
+    </ul>
+  </li>
+  <li><a href="#constructors">Constructors</a>
+    <ul>
+      <li><a href="#construct-objects-and-data">Construct objects and data</a></li>
+      <li><a href="#construct-data-types">Construct data types</a></li>
+      <li><a href="#filter-tables">Filter tables</a></li>
+    </ul>
+  </li>
+  <li><a href="#character-handling">Character Handling</a>
+    <ul>
+      <li><a href="#lower-and-upper-case-conversion">Lower and upper case conversion</a></li>
+    </ul>
+  </li>
+  <li><a href="#flow-control">Flow control</a>
+    <ul>
+      <li><a href="#loop-with-control-break">Loop with control break</a></li>
+    </ul>
+  </li>
+  <li><a href="#interface-implementation">Interface implementation</a>
+    <ul>
+      <li><a href="#behavior-on-not-implemented-interface-methods">Behavior on not implemented interface methods</a></li>
+      <li><a href="#partially-implement-interfaces-in-tests">Partially implement interfaces in tests</a></li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="functional-statements-and-expressions-in-abap">Functional statements and expressions in ABAP</h2>
+
+<p>Functional statements and expressions
+have the advantage that they follow the principle of an assignment,
+meaning the result is returned as a returning parameter,
+thus can be directly used in assignments and can be chained.</p>
+
+<p>Data type information in functional statements
+can be abbreviated by a <code class="highlighter-rouge">#</code>
+if the compiler can determine the data type from the context.</p>
+
+<blockquote>
+  <p><strong>Keep the clean code principles in mind</strong>
+when using these statements.
+They are very compact and powerful and may tempt you to
+compress your code so much that it becomes unintelligible.</p>
+</blockquote>
+
+<h2 id="inline-declaration-of-variables">Inline declaration of variables</h2>
+
+<p>Use the operators
+<a href="https://help.sap.com/doc/abapdocu_751_index_htm/7.51/en-US/abendata_inline.htm"><code class="highlighter-rouge">DATA</code></a>
+and
+<a href="https://help.sap.com/doc/abapdocu_751_index_htm/7.51/en-us/abenfield-symbol_inline.htm"><code class="highlighter-rouge">FIELD-SYMBOL</code></a>
+to combine the declaration and initial value assignment
+of a variable or field symbol.</p>
+
+<p>Allowed at write positions
+for which a type can be determined
+statically from the context.
+This <em>inferred</em> type is given to the declared symbol.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span><span class="p">(</span><span class="k">text</span><span class="p">)</span> <span class="o">=</span> <span class="s1">`This is a string`</span><span class="p">.</span>
+
+<span class="c1">" old style</span>
+<span class="k">DATA</span> <span class="k">text</span> <span class="k">TYPE</span> <span class="k">string</span><span class="p">.</span>
+<span class="k">text</span> <span class="o">=</span> <span class="s1">`This is a string`</span><span class="p">.</span>
+</code></pre></div></div>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span><span class="p">(</span><span class="k">result</span><span class="p">)</span> <span class="o">=</span> <span class="n">method_with_returning</span><span class="p">(</span> <span class="p">).</span>
+
+<span class="c1">" old style</span>
+<span class="k">DATA</span> <span class="k">result</span> <span class="k">TYPE</span> <span class="n">accounts_table</span><span class="p">.</span>
+<span class="k">result</span> <span class="o">=</span> <span class="n">method_with_returning</span><span class="p">(</span> <span class="p">).</span>
+</code></pre></div></div>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">method_with_exporting</span><span class="p">(</span> <span class="k">IMPORTING</span> <span class="k">parameter</span> <span class="o">=</span> <span class="k">DATA</span><span class="p">(</span><span class="n">accounts</span><span class="p">)</span> <span class="p">).</span>
+
+<span class="c1">" old style</span>
+<span class="k">DATA</span> <span class="n">accounts</span> <span class="k">TYPE</span> <span class="n">accounts_table</span><span class="p">.</span>
+<span class="n">method_with_exporting</span><span class="p">(</span> <span class="k">IMPORTING</span> <span class="k">parameter</span> <span class="o">=</span> <span class="n">accounts</span> <span class="p">).</span>
+</code></pre></div></div>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">LOOP</span> <span class="k">AT</span> <span class="n">accounts</span> <span class="k">INTO</span> <span class="k">DATA</span> <span class="p">(</span><span class="n">account</span><span class="p">).</span>
+<span class="k">ENDLOOP</span><span class="p">.</span>
+
+<span class="c1">" old style</span>
+<span class="k">DATA</span> <span class="n">account</span> <span class="k">TYPE</span> <span class="n">account_structure</span><span class="p">.</span>
+<span class="k">LOOP</span> <span class="k">AT</span> <span class="n">accounts</span> <span class="k">INTO</span> <span class="n">account</span><span class="p">.</span>
+<span class="k">ENDLOOP</span><span class="p">.</span>
+</code></pre></div></div>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">READ</span> <span class="k">TABLE</span> <span class="n">accounts</span> <span class="k">INTO</span> <span class="k">DATA</span><span class="p">(</span><span class="n">account_sap</span><span class="p">)</span> <span class="k">WITH</span> <span class="k">KEY</span> <span class="k">id</span> <span class="o">=</span> <span class="mi">5</span><span class="p">.</span>
+
+<span class="c1">" old style</span>
+<span class="k">DATA</span> <span class="n">account_sap</span> <span class="k">TYPE</span> <span class="n">account_structure</span><span class="p">.</span>
+<span class="k">READ</span> <span class="k">TABLE</span> <span class="n">account</span> <span class="k">INTO</span> <span class="k">data</span><span class="p">(</span><span class="n">account_sap</span><span class="p">)</span> <span class="k">WITH</span> <span class="n">u</span> <span class="k">id</span> <span class="o">=</span> <span class="mi">5</span><span class="p">.</span>
+</code></pre></div></div>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">LOOP</span> <span class="k">AT</span> <span class="n">accounts</span> <span class="k">ASSIGNING</span> <span class="k">FIELD-SYMBOL</span><span class="p">(</span><span class="o">&lt;</span><span class="n">account</span><span class="o">&gt;</span><span class="p">).</span>
+<span class="k">ENDLOOP</span><span class="p">.</span>
+
+<span class="c1">" old style</span>
+<span class="k">FIELD</span><span class="o">-</span><span class="k">SYMBOL</span> <span class="o">&lt;</span><span class="n">account</span><span class="o">&gt;</span> <span class="k">TYPE</span> <span class="n">account_structure</span><span class="p">.</span>
+<span class="k">LOOP</span> <span class="k">AT</span> <span class="n">accounts</span> <span class="k">ASSIGNING</span> <span class="p">(</span><span class="o">&lt;</span><span class="n">account</span><span class="o">&gt;</span><span class="p">.</span>
+<span class="k">ENDLOOP</span><span class="p">.</span>
+</code></pre></div></div>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">ASSIGN</span> <span class="k">COMPONENT</span> <span class="k">id</span> <span class="k">OF</span> <span class="n">account_sap</span> <span class="k">TO</span> <span class="k">FIELD-SYMBOL</span><span class="p">(</span><span class="o">&lt;</span><span class="n">account_id</span><span class="o">&gt;</span><span class="p">).</span>
+
+<span class="c1">" old style</span>
+<span class="k">FIELD</span><span class="o">-</span><span class="k">SYMBOL</span> <span class="o">&lt;</span><span class="n">account_id</span><span class="o">&gt;</span> <span class="k">TYPE</span> <span class="n">account_id_type</span><span class="p">.</span>
+<span class="k">ASSIGN</span> <span class="k">COMPONENT</span> <span class="k">id</span> <span class="k">OF</span> <span class="n">account_sap</span> <span class="k">TO</span> <span class="o">&lt;</span><span class="n">account_id</span><span class="o">&gt;</span><span class="p">.</span>
+</code></pre></div></div>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">t000</span> <span class="k">INTO</span> <span class="k">TABLE</span> <span class="o">@</span><span class="k">DATA</span><span class="p">(</span><span class="n">clients</span><span class="p">).</span>
+
+<span class="c1">" old style</span>
+<span class="k">DATA</span> <span class="n">clients</span> <span class="k">TYPE</span> <span class="k">STANDARD</span> <span class="k">TABLE</span> <span class="k">OF</span> <span class="n">t000</span><span class="p">.</span>
+<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">t000</span> <span class="k">INTO</span> <span class="k">TABLE</span> <span class="n">clients</span><span class="p">.</span>
+</code></pre></div></div>
+<h2 id="compound-assignment-operators">Compound Assignment Operators</h2>
+
+<p>SAP NetWeaver 7.54 introduces shorthand versions
+for arithmetic assignments and string concatenation.
+These assignments also allow expressions in the operand position.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Shorthand</th>
+      <th>Longhand</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>x += 1.</td>
+      <td>x = x + 1.</td>
+    </tr>
+    <tr>
+      <td>x -= 1.</td>
+      <td>x = x - 1.</td>
+    </tr>
+    <tr>
+      <td>x *= 1.</td>
+      <td>x = x * 1.</td>
+    </tr>
+    <tr>
+      <td>x /= 1.</td>
+      <td>x = x / 1.</td>
+    </tr>
+    <tr>
+      <td>x &amp;&amp;= `abc`.</td>
+      <td>x = x &amp;&amp; `abc`.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="non-initial-conditions">Non-Initial Conditions</h2>
+
+<p>The comparison <code class="highlighter-rouge">IS INITIAL</code> can be omitted in certain places.
+This can, for example, be used to shorten Boolean comparisons:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">IF</span> <span class="n">is_valid</span><span class="p">(</span> <span class="p">).</span>
+  <span class="c1">" method returned abap_true</span>
+<span class="k">ELSE</span><span class="p">.</span>
+  <span class="c1">" method returned abap_false</span>
+<span class="k">ENDIF</span><span class="p">.</span>
+</code></pre></div></div>
+
+<h2 id="enumerations">Enumerations</h2>
+
+<p>Define <a href="https://help.sap.com/doc/abapdocu_751_index_htm/7.51/en-US/abaptypes_enum.htm#!ABAP_ADDITION_1@1@">enumerations</a> instead of using constants.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">TYPES</span><span class="p">:</span>
+  <span class="k">BEGIN</span> <span class="k">OF</span> <span class="n">ENUM</span> <span class="n">scrum_status_type</span><span class="p">,</span>
+    <span class="k">open</span><span class="p">,</span>
+    <span class="n">in_progress</span><span class="p">,</span>
+    <span class="n">blocked</span><span class="p">,</span>
+    <span class="n">done</span><span class="p">,</span>
+  <span class="k">END</span> <span class="k">OF</span> <span class="n">ENUM</span> <span class="n">scrum_status_type</span><span class="p">.</span>
+
+<span class="k">DATA</span><span class="p">(</span><span class="n">scrum_status</span><span class="p">)</span> <span class="o">=</span> <span class="k">open</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>Old style:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CONSTANTS</span> <span class="n">scrum_status_open</span>       <span class="k">TYPE</span> <span class="k">i</span> <span class="k">VALUE</span> <span class="mi">1</span><span class="p">.</span>
+<span class="k">CONSTANTS</span> <span class="n">scrum_status_in_process</span> <span class="k">TYPE</span> <span class="k">i</span> <span class="k">VALUE</span> <span class="mi">2</span><span class="p">.</span>
+<span class="k">CONSTANTS</span> <span class="n">scrum_status_blocked</span>    <span class="k">TYPE</span> <span class="k">i</span> <span class="k">VALUE</span> <span class="mi">3</span><span class="p">.</span>
+<span class="k">CONSTANTS</span> <span class="n">scrum_status_done</span>       <span class="k">TYPE</span> <span class="k">i</span> <span class="k">VALUE</span> <span class="mi">4</span><span class="p">.</span>
+
+<span class="k">DATA</span> <span class="n">scrum</span> <span class="n">status</span> <span class="k">TYPE</span> <span class="k">i</span><span class="p">.</span>
+<span class="n">scrum_status</span> <span class="o">=</span> <span class="n">scrum_status_open</span><span class="p">.</span>
+</code></pre></div></div>
+
+<h2 id="internal-tables">Internal Tables</h2>
+
+<h3 id="count-table-lines">Count table lines</h3>
+
+<p>Count the number of lines of an internal table with
+<a href="https://help.sap.com/doc/abapdocu_751_index_htm/7.51/en-US/abendescriptive_functions_table.htm"><code class="highlighter-rouge">lines( )</code></a>.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span><span class="p">(</span><span class="n">number_of_lines</span><span class="p">)</span> <span class="o">=</span> <span class="nb">lines</span><span class="p">(</span> <span class="n">accounts</span> <span class="p">).</span>
+</code></pre></div></div>
+
+<p>Old style:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span> <span class="n">number_of_lines</span> <span class="k">TYPE</span> <span class="k">i</span><span class="p">.</span>
+<span class="k">DESCRIBE</span> <span class="k">TABLE</span> <span class="n">accounts</span> <span class="k">LINES</span> <span class="n">number_of_lines</span><span class="p">.</span>
+</code></pre></div></div>
+
+<h3 id="check-existence-of-a-table-line">Check existence of a table line</h3>
+
+<p>Check the existence of a line in an internal table,
+use the function <code class="highlighter-rouge">line_exists( )</code> within an if-clause.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">IF</span> <span class="nb">line_exists</span><span class="p">(</span> <span class="n">accounts</span><span class="p">[</span> <span class="k">id</span> <span class="o">=</span> <span class="mi">4711</span> <span class="p">]</span> <span class="p">).</span>
+  <span class="c1">"line has been found</span>
+<span class="k">ENDIF</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>Old style:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">READ</span> <span class="k">TABLE</span> <span class="n">accounts</span> <span class="k">WITH</span> <span class="k">KEY</span> <span class="k">id</span> <span class="o">=</span> <span class="mi">4711</span> <span class="k">TRANSPORTING</span> <span class="k">NO</span> <span class="k">FIELDS</span><span class="p">.</span>
+<span class="k">IF</span> <span class="n">sy</span><span class="o">-</span><span class="n">subrc</span> <span class="o">=</span> <span class="mi">0</span><span class="p">.</span>
+  <span class="c1">"line has been found</span>
+<span class="k">ENDIF</span><span class="p">.</span>
+</code></pre></div></div>
+
+<h3 id="access-table-key-with-uncertain-result">Access table key with uncertain result</h3>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span><span class="p">(</span><span class="n">account</span><span class="p">)</span> <span class="o">=</span> <span class="k">VALUE</span> <span class="o">#</span><span class="p">(</span> <span class="n">accounts</span><span class="p">[</span> <span class="k">id</span> <span class="o">=</span> <span class="s1">'4711'</span> <span class="p">]</span> <span class="k">OPTIONAL</span> <span class="p">).</span>
+</code></pre></div></div>
+
+<p>By default, failing functional key accesses throw an exception.
+The addition <code class="highlighter-rouge">VALUE ... OPTIONAL</code> suppresses this.</p>
+
+<p>Old style:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">TRY</span><span class="p">.</span>
+    <span class="n">account</span> <span class="o">=</span> <span class="n">accounts</span><span class="p">[</span> <span class="k">id</span> <span class="o">=</span> <span class="s1">'4711'</span> <span class="p">]</span>
+  <span class="k">CATCH</span> <span class="n">cx_sy_itab_line_not_found</span><span class="p">.</span>
+<span class="k">ENDTRY</span><span class="p">.</span>
+</code></pre></div></div>
+
+<h3 id="access-table-index">Access table index</h3>
+
+<p>Access a specific index of an internal table directly, use the bracket notation <code class="highlighter-rouge">table_name[ ]</code>.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span><span class="p">(</span><span class="n">id_of_account_5</span><span class="p">)</span> <span class="o">=</span> <span class="n">accounts</span><span class="p">[</span> <span class="mi">5</span> <span class="p">]</span><span class="o">-</span><span class="k">id</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>Old style:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">READ</span> <span class="k">TABLE</span> <span class="n">accounts</span> <span class="k">INDEX</span> <span class="mi">5</span> <span class="k">INTO</span> <span class="k">DATA</span><span class="p">(</span><span class="n">account_5</span><span class="p">).</span>
+<span class="k">IF</span> <span class="n">sy</span><span class="o">-</span><span class="n">subrc</span> <span class="o">=</span> <span class="mi">0</span><span class="p">.</span>
+  <span class="k">DATA</span><span class="p">(</span><span class="n">id_of_account_5</span><span class="p">)</span> <span class="o">=</span> <span class="n">account_5</span><span class="o">-</span><span class="k">id</span><span class="p">.</span>
+<span class="k">ENDIF</span><span class="p">.</span>
+</code></pre></div></div>
+
+<h2 id="conditions">Conditions</h2>
+
+<h3 id="conditional-distinction">Conditional distinction</h3>
+
+<p>To evaluate conditions, use the <code class="highlighter-rouge">COND #( )</code> operator.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span><span class="p">(</span><span class="k">value</span><span class="p">)</span> <span class="o">=</span> <span class="k">COND</span> <span class="o">#</span><span class="p">(</span> <span class="k">WHEN</span> <span class="n">status</span> <span class="o">=</span> <span class="k">open</span> <span class="k">THEN</span> <span class="mi">1</span>
+                      <span class="k">WHEN</span> <span class="n">status</span> <span class="o">=</span> <span class="n">blocked</span> <span class="k">THEN</span> <span class="mi">3</span>
+                      <span class="k">ELSE</span> <span class="mi">7</span> <span class="p">).</span>
+</code></pre></div></div>
+
+<p>Old style:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span> <span class="k">value</span> <span class="k">TYPE</span> <span class="k">i</span><span class="p">.</span>
+<span class="k">IF</span> <span class="n">status</span> <span class="o">=</span> <span class="k">open</span><span class="p">.</span>
+  <span class="k">value</span> <span class="o">=</span> <span class="mi">1</span><span class="p">.</span>
+<span class="k">ELSEIF</span> <span class="n">status</span> <span class="o">=</span> <span class="n">blocked</span><span class="p">.</span>
+  <span class="k">value</span> <span class="o">=</span> <span class="mi">3</span><span class="p">.</span>
+<span class="k">ELSE</span><span class="p">.</span>
+  <span class="k">value</span> <span class="o">=</span> <span class="mi">7</span><span class="p">.</span>
+<span class="k">ENDIF</span><span class="p">.</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>Alternatively you may use the <a href="/CleanABAP.html#use-xsdbool-to-set-boolean-variables">function <code class="highlighter-rouge">xsdbool( )</code></a></p>
+</blockquote>
+
+<h3 id="case-distinction">Case distinction</h3>
+
+<p>Evaluate case distinction with the <code class="highlighter-rouge">SWITCH #( )</code> operator</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span><span class="p">(</span><span class="n">status</span><span class="p">)</span> <span class="o">=</span> <span class="k">SWITCH</span> <span class="o">#</span><span class="p">(</span> <span class="n">scrum_status</span>
+    <span class="k">WHEN</span> <span class="n">scrum_status_open</span> <span class="k">THEN</span> <span class="n">status_waiting</span>
+    <span class="k">WHEN</span> <span class="n">scrum_status_in_process</span> <span class="k">THEN</span> <span class="n">status_busy</span>
+    <span class="k">WHEN</span> <span class="n">scrum_status_blocked</span> <span class="k">THEN</span> <span class="n">status_alarm</span>
+    <span class="k">WHEN</span> <span class="n">scrum_status_done</span> <span class="k">THEN</span> <span class="n">status_ok</span> <span class="p">).</span>
+</code></pre></div></div>
+
+<p>Old style:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span> <span class="n">status</span> <span class="k">TYPE</span> <span class="n">status_enum</span><span class="p">.</span>
+<span class="k">CASE</span> <span class="n">scrum_status</span><span class="p">.</span>
+  <span class="k">WHEN</span> <span class="n">scrum_status_open</span><span class="p">.</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="n">status_waiting</span><span class="p">.</span>
+  <span class="k">WHEN</span> <span class="n">scrum_status_in_process</span><span class="p">.</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="n">status_busy</span><span class="p">.</span>
+  <span class="k">WHEN</span> <span class="n">scrum_status_blocked</span><span class="p">.</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="n">status_alarm</span><span class="p">.</span>
+  <span class="k">WHEN</span> <span class="n">scrum_status_done</span><span class="p">.</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="n">status_ok</span><span class="p">.</span>
+<span class="k">ENDCASE</span><span class="p">.</span>
+</code></pre></div></div>
+
+<h3 id="case-distinctions-of-reference-types-class-and-interface">Case distinctions of reference types class and interface</h3>
+
+<p>Switch on a reference types class and interface using the <code class="highlighter-rouge">CASE</code> extension <code class="highlighter-rouge">TYPE OF</code>.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CASE</span> <span class="k">type</span> <span class="k">of</span> <span class="n">account</span><span class="p">.</span>
+  <span class="k">WHEN</span> <span class="k">TYPE</span> <span class="n">bank_account</span> <span class="k">INTO</span> <span class="k">DATA</span><span class="p">(</span><span class="n">bank_account</span><span class="p">).</span>
+    <span class="c1">" some processing ...</span>
+  <span class="k">WHEN</span> <span class="k">OTHERS</span><span class="p">.</span>
+    <span class="c1">" some processing ...</span>
+<span class="k">ENDCASE</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>In a condition e.g. in an <code class="highlighter-rouge">IF</code> statement the <code class="highlighter-rouge">IS INSTANCE OF</code> operator can be used.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">IF</span> <span class="n">account</span> <span class="k">IS</span> <span class="k">INSTANCE</span> <span class="k">OF</span> <span class="n">bank_account</span><span class="p">.</span>
+  <span class="c1">" some processing ...</span>
+<span class="k">ENDIF</span><span class="p">.</span>
+</code></pre></div></div>
+
+<h2 id="conversions">Conversions</h2>
+
+<h3 id="cast-data-references">Cast data references</h3>
+
+<p>Cast reference types to other reference types using the <code class="highlighter-rouge">CAST #( )</code> operator.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span><span class="p">(</span><span class="n">my_account</span><span class="p">)</span> <span class="o">=</span> <span class="k">CAST</span> <span class="n">account</span><span class="p">(</span> <span class="k">NEW</span> <span class="n">bank_account</span><span class="p">(</span> <span class="p">)</span> <span class="p">).</span>
+</code></pre></div></div>
+
+<p>Old style:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span> <span class="n">my_account</span> <span class="k">TYPE</span> <span class="k">REF</span> <span class="k">TO</span> <span class="n">account</span><span class="p">.</span>
+<span class="k">CREATE</span> <span class="k">OBJECT</span> <span class="n">my_account</span> <span class="k">TYPE</span> <span class="n">bank_account</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>or</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span> <span class="n">my_account</span> <span class="k">TYPE</span> <span class="k">REF</span> <span class="k">TO</span> <span class="n">account</span><span class="p">.</span>
+<span class="k">DATA</span> <span class="n">my_bank_account</span> <span class="k">TYPE</span> <span class="k">REF</span> <span class="k">TO</span> <span class="n">bank_account</span><span class="p">.</span>
+<span class="k">CREATE</span> <span class="k">OBJECT</span> <span class="n">my_bank_account</span><span class="p">.</span>
+<span class="n">my_account</span> <span class="o">?=</span> <span class="n">bank_account</span><span class="p">.</span>
+</code></pre></div></div>
+
+<h3 id="create-data-references">Create data references</h3>
+
+<p>Create data references to structures and tables with the operator <code class="highlighter-rouge">REF #( )</code>.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span> <span class="n">accounts</span> <span class="k">TYPE</span> <span class="n">accounts_table</span><span class="p">.</span>
+<span class="n">import_accounts_references</span><span class="p">(</span> <span class="k">REF</span> <span class="o">#</span><span class="p">(</span> <span class="n">accounts</span> <span class="p">)</span> <span class="p">).</span>
+</code></pre></div></div>
+
+<p>Old style:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span> <span class="n">accounts</span> <span class="k">TYPE</span> <span class="n">accounts_table</span><span class="p">.</span>
+<span class="k">DATA</span> <span class="n">accounts_reference</span> <span class="k">TYPE</span> <span class="k">REF</span> <span class="k">TO</span> <span class="n">accounts_type</span><span class="p">.</span>
+<span class="k">GET</span> <span class="k">REFERENCE</span> <span class="k">OF</span> <span class="n">accounts</span> <span class="k">INTO</span> <span class="n">accounts_reference</span><span class="p">.</span>
+<span class="n">import_accounts_references</span><span class="p">(</span> <span class="n">accounts_reference</span> <span class="p">)</span> <span class="p">).</span>
+</code></pre></div></div>
+
+<h3 id="convert-data-types">Convert data types</h3>
+
+<p>Use the operator <code class="highlighter-rouge">CONV #( )</code> to convert data types and save temporary variables.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">method_takes_string</span><span class="p">(</span> <span class="k">CONV</span> <span class="o">#</span><span class="p">(</span> <span class="n">a_char</span> <span class="p">)</span> <span class="p">).</span>
+</code></pre></div></div>
+
+<p>Old style:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span> <span class="n">a_string</span> <span class="k">TYPE</span> <span class="k">string</span><span class="p">.</span>
+<span class="n">a_string</span> <span class="o">=</span> <span class="n">a_char</span><span class="p">.</span>
+<span class="n">method_takes_string</span><span class="p">(</span> <span class="n">a_string</span> <span class="p">).</span>
+</code></pre></div></div>
+
+<h3 id="copy-fields-with-matching-names">Copy fields with matching names</h3>
+
+<p>Copy fields with matching names from one data type to another with <code class="highlighter-rouge">corresponding #( )</code>.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">target_structure</span> <span class="o">=</span> <span class="k">CORRESPONDING</span> <span class="o">#</span><span class="p">(</span> <span class="n">source_structure</span> <span class="p">).</span>
+</code></pre></div></div>
+
+<p>Old style:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">MOVE</span><span class="o">-</span><span class="k">CORRESPONDING</span> <span class="n">source_structure</span> <span class="k">TO</span> <span class="n">target_structure</span><span class="p">.</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>Caution: The two statements differ in behavior.
+The <code class="highlighter-rouge">CORRESPONDING( )</code> statement is a constructor statement, meaning all fields in the <code class="highlighter-rouge">target_structure</code> are initialized before the corresponding <code class="highlighter-rouge">source_structure</code> values are copied to the <code class="highlighter-rouge">target_sructure</code>
+The <code class="highlighter-rouge">MOVE-CORRESPONDING</code> statement in contrast leaves the content of the not matching fields in the `target_structure untouched.</p>
+</blockquote>
+
+<h2 id="constructors">Constructors</h2>
+
+<h3 id="construct-objects-and-data">Construct objects and data</h3>
+
+<p>Construct objects and data with the <code class="highlighter-rouge">NEW #( )</code> operator.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span><span class="p">(</span><span class="n">account</span><span class="p">)</span> <span class="o">=</span> <span class="k">NEW</span> <span class="n">cl_account</span><span class="p">(</span> <span class="p">).</span>
+
+<span class="k">DATA</span><span class="p">(</span><span class="n">dref</span><span class="p">)</span> <span class="o">=</span> <span class="k">NEW</span> <span class="n">struct_type</span><span class="p">(</span> <span class="n">component_1</span> <span class="o">=</span> <span class="mi">10</span>
+                              <span class="n">component_2</span> <span class="o">=</span> <span class="s1">'a'</span> <span class="p">).</span>
+</code></pre></div></div>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span><span class="p">(</span><span class="n">account</span><span class="p">)</span> <span class="o">=</span> <span class="k">CAST</span> <span class="n">if_account</span><span class="p">(</span> <span class="k">NEW</span> <span class="n">cl_account</span><span class="p">(</span> <span class="p">)</span> <span class="p">).</span>
+
+<span class="k">DATA</span> <span class="n">data_structure</span> <span class="k">TYPE</span> <span class="k">REF</span> <span class="k">TO</span> <span class="n">struct_type</span><span class="p">.</span>
+<span class="k">CREATE</span> <span class="k">DATA</span> <span class="n">data_structure</span><span class="p">.</span>
+<span class="n">data_reference</span><span class="o">-&gt;</span><span class="n">component_1</span> <span class="o">=</span> <span class="mi">10</span><span class="p">.</span>
+<span class="n">data_reference</span><span class="o">-&gt;</span><span class="n">component_2</span> <span class="o">=</span> <span class="s1">'a'</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>Old style:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span> <span class="n">account</span> <span class="k">TYPE</span> <span class="k">REF</span> <span class="k">TO</span> <span class="n">cl_account</span><span class="p">.</span>
+<span class="k">CREATE</span> <span class="k">OBJECT</span> <span class="n">account</span><span class="p">.</span>
+</code></pre></div></div>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span> <span class="n">account</span> <span class="k">TYPE</span> <span class="k">REF</span> <span class="k">TO</span> <span class="n">if_account</span><span class="p">.</span>
+<span class="k">CREATE</span> <span class="k">OBJECT</span> <span class="n">account</span> <span class="k">TYPE</span> <span class="n">cl_account</span><span class="p">.</span>
+</code></pre></div></div>
+
+<h3 id="construct-data-types">Construct data types</h3>
+
+<p>Construct structures and tables using the <code class="highlighter-rouge">VALUE #( )</code> operator.
+It also constructs initial values for most data types.</p>
+
+<blockquote>
+  <p>This statement is a life saver when writing ABAP unit tests.</p>
+</blockquote>
+
+<p>Structure:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span><span class="p">(</span><span class="n">account</span><span class="p">)</span> <span class="o">=</span> <span class="k">VALUE</span> <span class="n">account_structure</span><span class="p">(</span> <span class="k">id</span> <span class="o">=</span> <span class="mi">5</span>
+                                         <span class="k">name</span> <span class="o">=</span> <span class="s1">'SAP'</span> <span class="p">).</span>
+</code></pre></div></div>
+
+<p>Old style:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span> <span class="n">account</span> <span class="k">TYPE</span> <span class="n">account_structure</span><span class="p">.</span>
+<span class="n">account</span><span class="o">-</span><span class="k">id</span> <span class="o">=</span> <span class="mi">5</span><span class="p">.</span>
+<span class="n">account</span><span class="o">-</span><span class="k">name</span> <span class="o">=</span> <span class="s1">'SAP'</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>Table:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span><span class="p">(</span><span class="n">accounts</span><span class="p">)</span> <span class="o">=</span> <span class="k">VALUE</span> <span class="n">accounts_table</span><span class="p">(</span> <span class="p">(</span> <span class="k">id</span> <span class="o">=</span> <span class="mi">5</span>  <span class="k">name</span> <span class="o">=</span> <span class="s1">'SAP'</span> <span class="p">)</span>
+                                       <span class="p">(</span> <span class="k">id</span> <span class="o">=</span> <span class="mi">6</span>  <span class="k">name</span> <span class="o">=</span> <span class="s1">'ABCDE'</span> <span class="p">)</span> <span class="p">).</span>
+</code></pre></div></div>
+
+<p>Old style:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span> <span class="n">accounts</span> <span class="k">TYPE</span> <span class="n">accounts_table</span><span class="p">.</span>
+<span class="k">DATA</span> <span class="n">account</span> <span class="k">TYPE</span> <span class="n">account_structure</span><span class="p">.</span>
+<span class="n">account</span><span class="o">-</span><span class="k">id</span> <span class="o">=</span> <span class="mi">5</span><span class="p">.</span>
+<span class="n">account</span><span class="o">-</span><span class="k">name</span> <span class="o">=</span> <span class="s1">'SAP'</span><span class="p">.</span>
+<span class="k">INSERT</span> <span class="n">account</span> <span class="k">INTO</span> <span class="k">TABLE</span> <span class="n">accounts</span><span class="p">.</span>
+<span class="n">account</span><span class="o">-</span><span class="k">id</span> <span class="o">=</span> <span class="mi">6</span><span class="p">.</span>
+<span class="n">account</span><span class="o">-</span><span class="k">name</span> <span class="o">=</span> <span class="s1">'ABCDE'</span><span class="p">.</span>
+<span class="k">INSERT</span> <span class="n">ACCOUNT</span> <span class="k">INTO</span> <span class="k">TABLE</span> <span class="n">accounts</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>Construct tables based on other tables:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">result</span> <span class="o">=</span> <span class="k">VALUE</span> <span class="o">#</span><span class="p">(</span> <span class="k">FOR</span> <span class="n">row</span> <span class="k">IN</span> <span class="k">input</span> <span class="p">(</span> <span class="n">row</span><span class="o">-</span><span class="k">text</span> <span class="p">)</span> <span class="p">).</span>
+</code></pre></div></div>
+
+<p>Old style:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">LOOP</span> <span class="k">AT</span> <span class="k">input</span> <span class="k">INTO</span> <span class="k">DATA</span><span class="p">(</span><span class="n">row</span><span class="p">).</span>
+  <span class="k">INSERT</span> <span class="n">row</span><span class="o">-</span><span class="k">text</span> <span class="k">INTO</span> <span class="k">TABLE</span> <span class="k">result</span><span class="p">.</span>
+<span class="k">ENDLOOP</span><span class="p">.</span>
+</code></pre></div></div>
+
+<h3 id="filter-tables">Filter tables</h3>
+
+<p>Construct a table as a subset of another stable using <code class="highlighter-rouge">FILTER #( )</code>.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">bank_accounts</span> <span class="o">=</span> <span class="k">FILTER</span> <span class="o">#</span><span class="p">(</span> <span class="n">accounts</span>
+                          <span class="k">WHERE</span> <span class="n">account_type</span> <span class="o">=</span> <span class="s1">'B'</span> <span class="p">).</span>
+</code></pre></div></div>
+
+<p>Old style:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span> <span class="n">bank_account</span> <span class="k">TYPE</span> <span class="n">bank_account</span><span class="p">.</span>
+<span class="k">LOOP</span> <span class="k">AT</span> <span class="n">accounts</span> <span class="k">INTO</span> <span class="n">bank_account</span> <span class="k">WHERE</span> <span class="n">account_type</span> <span class="o">=</span> <span class="s1">'B'</span><span class="p">.</span>
+  <span class="k">INSERT</span> <span class="n">bank_account</span> <span class="k">INTO</span> <span class="k">TABLE</span> <span class="n">bank_accounts</span><span class="p">.</span>
+<span class="k">ENDLOOP</span><span class="p">.</span>
+</code></pre></div></div>
+
+<h2 id="character-handling">Character Handling</h2>
+
+<h3 id="lower-and-upper-case-conversion">Lower and upper case conversion</h3>
+
+<p>Convert characters between cases using <code class="highlighter-rouge">to_upper( )</code> or <code class="highlighter-rouge">to_lower( )</code>.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span><span class="p">(</span><span class="n">uppercase</span><span class="p">)</span> <span class="o">=</span> <span class="nb">to_upper</span><span class="p">(</span> <span class="n">lowercase</span> <span class="p">).</span>
+<span class="k">DATA</span><span class="p">(</span><span class="n">lowercase</span><span class="p">)</span> <span class="o">=</span> <span class="nb">to_lower</span><span class="p">(</span> <span class="n">uppercase</span> <span class="p">).</span>
+</code></pre></div></div>
+
+<p>Old style:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">TRANSLATE</span> <span class="n">lowercase</span> <span class="k">TO</span> <span class="k">UPPER</span> <span class="k">CASE</span><span class="p">.</span>
+</code></pre></div></div>
+
+<h2 id="flow-control">Flow control</h2>
+
+<h3 id="loop-with-control-break">Loop with control break</h3>
+
+<p>Process data on defined groups using the new features with the <code class="highlighter-rouge">loop</code> statement extension <code class="highlighter-rouge">group by ...</code> and <code class="highlighter-rouge">loop at group</code>.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">LOOP</span> <span class="k">AT</span> <span class="n">accounts</span> <span class="k">INTO</span> <span class="k">DATA</span><span class="p">(</span><span class="n">account</span><span class="p">)</span> <span class="k">GROUP</span> <span class="k">BY</span> <span class="n">grouping_id</span><span class="p">.</span>
+  <span class="c1">" once per group before group ...</span>
+  <span class="k">LOOP</span> <span class="k">AT</span> <span class="k">GROUP</span> <span class="n">account</span> <span class="k">INTO</span> <span class="k">DATA</span><span class="p">(</span><span class="n">account_group</span><span class="p">).</span>
+    <span class="c1">" for each group member ...</span>
+  <span class="k">ENDLOOP</span><span class="p">.</span>
+  <span class="c1">" once per group after group ...</span>
+<span class="k">ENDLOOP</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>Old style:</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">DATA</span> <span class="n">previous_grouping_id</span> <span class="k">TYPE</span> <span class="k">i</span><span class="p">.</span>
+<span class="k">DATA</span> <span class="n">last_account</span> <span class="k">TYPE</span> <span class="n">account</span><span class="p">.</span>
+<span class="k">LOOP</span> <span class="k">AT</span> <span class="n">accounts</span> <span class="k">INTO</span> <span class="k">data</span><span class="p">(</span><span class="n">account</span><span class="p">).</span>
+  <span class="k">IF</span> <span class="n">account</span><span class="o">-</span><span class="n">grouping_id</span> <span class="o">&lt;&gt;</span> <span class="n">previous_grouping_id</span><span class="p">.</span>
+    <span class="n">previous_grouping_id</span> <span class="o">=</span> <span class="n">account</span><span class="o">-</span><span class="n">grouping_id</span>
+    <span class="c1">" once per group before group ...</span>
+    <span class="k">IF</span> <span class="n">last_account</span> <span class="k">IS</span> <span class="k">NOT</span> <span class="k">INITIAL</span><span class="p">.</span>
+      <span class="c1">" once per group after group ...</span>
+    <span class="k">ENDIF</span><span class="p">.</span>
+  <span class="k">ENDIF</span><span class="p">.</span>
+  <span class="c1">" for each group member ...</span>
+  <span class="n">last_account</span> <span class="o">=</span> <span class="n">account</span><span class="p">.</span>
+<span class="k">ENDLOOP</span><span class="p">.</span>
+<span class="k">IF</span> <span class="n">last_account</span> <span class="k">IS</span> <span class="k">NOT</span> <span class="k">INITIAL</span><span class="p">.</span>
+  <span class="c1">" once per group after group</span>
+<span class="k">ENDIF</span><span class="p">.</span>
+</code></pre></div></div>
+
+<h2 id="interface-implementation">Interface implementation</h2>
+
+<h3 id="behavior-on-not-implemented-interface-methods">Behavior on not implemented interface methods</h3>
+
+<p>Define the effect on not implemented interface methods.</p>
+
+<p>Add <code class="highlighter-rouge">DEFAULT IGNORE</code> to advise ABAP to handle the call to this method if not implemented as a call to an empty implementation.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">INTERFACE</span> <span class="n">account</span><span class="p">.</span>
+  <span class="k">METHODS</span> <span class="n">new_method</span> <span class="k">DEFAULT</span> <span class="k">IGNORE</span><span class="p">.</span>
+<span class="k">ENDINTERFACE</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>Add <code class="highlighter-rouge">DEFAULT FAIL</code> to advise ABAP to raise an exception <code class="highlighter-rouge">CX_SY_DYN_CALL_ILLEGAL_METHOD</code> if the not implemented method is called. This is the default behavior.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">INTERFACE</span> <span class="n">account</span><span class="p">.</span>
+  <span class="k">METHODS</span> <span class="n">new_method</span> <span class="k">default</span> <span class="k">FAIL</span><span class="p">.</span>
+<span class="k">ENDINTERFACE</span><span class="p">.</span>
+</code></pre></div></div>
+
+<h3 id="partially-implement-interfaces-in-tests">Partially implement interfaces in tests</h3>
+
+<p>Implement in tests for e.g. test doubles only the interface methods which you need and skip the not needed with the <code class="highlighter-rouge">partially implemented</code> extension of the <code class="highlighter-rouge">interfaces</code> statement.</p>
+
+<div class="language-ABAP highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">INTERFACE</span> <span class="n">account</span><span class="p">.</span>
+  <span class="k">METHODS</span> <span class="n">add_account</span> <span class="k">IMPORTING</span> <span class="n">account</span> <span class="k">TYPE</span> <span class="n">account</span><span class="p">.</span>
+  <span class="k">METHODS</span> <span class="n">delete_account</span> <span class="k">IMPORTING</span> <span class="n">account_id</span> <span class="k">TYPE</span> <span class="n">account_id</span><span class="p">.</span>
+  <span class="k">METHODS</span> <span class="n">get_account</span> <span class="k">IMPORTING</span> <span class="n">account_id</span> <span class="k">TYPE</span> <span class="n">account_id</span>
+                      <span class="k">RETURNING</span> <span class="nb">value</span><span class="p">(</span><span class="k">result</span><span class="p">)</span> <span class="k">TYPE</span> <span class="n">account</span><span class="p">.</span>
+<span class="k">ENDINTERFACE</span><span class="p">.</span>
+
+<span class="k">CLASS</span> <span class="n">test_double</span> <span class="k">DEFINITION</span> <span class="k">FOR</span> <span class="k">TESTING</span><span class="p">.</span>
+  <span class="k">PUBLIC</span> <span class="k">SECTION</span><span class="p">.</span>
+  <span class="k">INTERFACES</span> <span class="n">account</span> <span class="k">PARTIALLY</span> <span class="k">IMPLEMENTED</span><span class="p">.</span>
+  <span class="k">DATA</span> <span class="n">account_stub</span> <span class="k">TYPE</span> <span class="n">account</span><span class="p">.</span>
+<span class="k">ENDCLASS</span><span class="p">.</span>
+
+<span class="k">CLASS</span> <span class="n">test_double</span> <span class="k">IMPLEMENTATION</span><span class="p">.</span>
+  <span class="k">METHOD</span> <span class="n">productive</span><span class="o">~</span><span class="k">get</span><span class="p">.</span>
+    <span class="k">result</span> <span class="o">=</span> <span class="n">account_stub</span><span class="p">.</span>
+  <span class="k">ENDMETHOD</span><span class="p">.</span>
+<span class="k">ENDCLASS</span><span class="p">.</span>
+</code></pre></div></div>
+
+</div>
+
+    </div>
+
+    <footer class="footer-min">
+  <div class="text-muted">
+	SAP
+	&nbsp;&nbsp;&bull;&nbsp;&nbsp;
+	
+	  2019
+	
+
+    
+  </div>
+</footer>
+
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<!--
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/sb-sap/highlightjs-sap-abap@v0.1.1/src/abap.js"></script>
+-->
+<!-- <script src="https://cdn.jsdelivr.net/gh/highlightjs/highlightjs-sap-abap@latest/src/abap.js"></script> -->
+<!--<script src="https://raw.githubusercontent.com/sb-sap/highlightjs-sap-abap/master/src/abap.js"></script> -->
+<script>
+//	hljs.initHighlightingOnLoad();
+</script>
+
+
+  </body>
+</html>
