@@ -842,13 +842,17 @@ CONSTANTS:
 The group also allows you group-wise access, for example for input validation:
 
 ```ABAP
-DO number_of_constants TIMES.
+DO.
   ASSIGN COMPONENT sy-index OF STRUCTURE message_severity TO FIELD-SYMBOL(<constant>).
-  IF <constant> = input.
-    is_valid = abap_true.
+  IF sy-subrc IS INITIAL.
+    IF input = <constant>.
+      DATA(is_valid) = abap_true.
+      RETURN.
+    ENDIF.
+  ELSE.
     RETURN.
   ENDIF.
-ENDWHILE.
+ENDDO.
 ```
 
 > Read more in _Chapter 17: Smells and Heuristics: G27: Structure over Convention_ of [Robert C. Martin's _Clean Code_].
@@ -1511,7 +1515,7 @@ ENDIF.
 > [Clean ABAP](#clean-abap) > [Content](#content) > [Ifs](#ifs) > [This section](#keep-the-nesting-depth-low)
 
 ```ABAP
-" ani-pattern
+" anti-pattern
 IF <this>.
   IF <that>.
   ENDIF.
@@ -2656,6 +2660,7 @@ A method likely does one thing if
 - it has [exactly one output parameter](#return-export-or-change-exactly-one-parameter)
 - it is [small](#keep-methods-small)
 - it [descends one level of abstraction](#descend-one-level-of-abstraction)
+- it only [throws one type of exception)(#throw-one-type-of-exception)
 - you cannot extract meaningful other methods
 - you cannot meaningfully group its statements into sections
 
@@ -2891,7 +2896,7 @@ METHOD read_customizing.
     RETURN.
   ENDIF.
   " do whatever needs doing
-ENDMETHOD:
+ENDMETHOD.
 ```
 
 You can avoid the question completely by reversing the validation
@@ -2902,7 +2907,7 @@ METHOD read_customizing.
   IF keys IS NOT INITIAL.
     " do whatever needs doing
   ENDIF.
-ENDMETHOD:
+ENDMETHOD.
 ```
 
 In any case, consider whether returning nothing is really the appropriate behavior.
