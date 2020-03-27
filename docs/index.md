@@ -1056,7 +1056,7 @@ DATA itab1 TYPE STANDARD TABLE OF row_type WITH EMPTY KEY.
 
 > Following [Horst Keller's blog on _Internal Tables with Empty Key_](https://blogs.sap.com/2013/06/27/abap-news-for-release-740-internal-tables-with-empty-key/)
 > 
-> **Caution:** `SORT` on internal tables with `EMPTY KEY` will not sort at all,
+> **Caution:** `SORT` on internal tables with `EMPTY KEY` (without explicit sort fields) will not sort at all,
 > but syntax warnings are issued in case the key's emptiness can be determined statically.
 
 ### Prefer INSERT INTO TABLE to APPEND TO
@@ -2660,7 +2660,7 @@ A method likely does one thing if
 - it has [exactly one output parameter](#return-export-or-change-exactly-one-parameter)
 - it is [small](#keep-methods-small)
 - it [descends one level of abstraction](#descend-one-level-of-abstraction)
-- it only [throws one type of exception)(#throw-one-type-of-exception)
+- it only [throws one type of exception](#throw-one-type-of-exception)
 - you cannot extract meaningful other methods
 - you cannot meaningfully group its statements into sections
 
