@@ -208,7 +208,7 @@ The [Cheat Sheet](cheat-sheet/CheatSheet.md) is a print-optimized version.
     - [How to execute test classes](#how-to-execute-test-classes)
   - [Code Under Test](#code-under-test)
     - [Name the code under test meaningfully, or default to CUT](#name-the-code-under-test-meaningfully-or-default-to-cut)
-    - [Test interfaces, not classes](#test-interfaces-not-classes)
+    - [Test against interfaces, not implementations](#test-against-interfaces-not-implementations)
     - [Extract the call to the code under test to its own method](#extract-the-call-to-the-code-under-test-to-its-own-method)
   - [Injection](#injection)
     - [Use dependency inversion to inject test doubles](#use-dependency-inversion-to-inject-test-doubles)
@@ -792,6 +792,8 @@ ENDCLASS.
 ```
 
 instead of mixing unrelated things
+or misleading people to the conclusion
+that constants collections could be "implemented":
 
 ```ABAP
 " anti-pattern
@@ -2656,7 +2658,7 @@ It should do it in the best way possible.
 A method likely does one thing if
 
 - it has [few input parameters](#aim-for-few-importing-parameters-at-best-less-than-three)
-- that [don't include Boolean parameters](#split-method-instead-of-boolean-input-parameter)
+- it [doesn't include Boolean parameters](#split-method-instead-of-boolean-input-parameter)
 - it has [exactly one output parameter](#return-export-or-change-exactly-one-parameter)
 - it is [small](#keep-methods-small)
 - it [descends one level of abstraction](#descend-one-level-of-abstraction)
@@ -2929,6 +2931,7 @@ The statement behaves differently in different positions and may lead to unclear
 For example,
 [`CHECK` in a `LOOP` ends the current iteration and proceeds with the next one](https://help.sap.com/doc/abapdocu_752_index_htm/7.52/en-US/abapcheck_loop.htm);
 people might accidentally expect it to end the method or exit the loop.
+Prefer using an `IF` statement in combination with `CONTINUE` instead, since `CONTINUE` only can be used in loops.
 
 > Based on the [section _Exiting Procedures_ in the ABAP Programming Guidelines](https://help.sap.com/doc/abapdocu_751_index_htm/7.51/en-US/index.htm?file=abenexit_procedure_guidl.htm).
 > Note that this contradicts the [keyword reference for `CHECK` in loops](https://help.sap.com/doc/abapdocu_752_index_htm/7.52/en-US/abapcheck_loop.htm).
@@ -4309,9 +4312,9 @@ Especially in unclean and confusing tests, calling the variable `cut`
 can temporarily help the reader see what's actually tested.
 However, tidying up the tests is the actual way to go for the long run.
 
-#### Test interfaces, not classes
+#### Test against interfaces, not implementations
 
-> [Clean ABAP](#clean-abap) > [Content](#content) > [Testing](#testing) > [Code Under Test](#code-under-test) > [This section](#test-interfaces-not-classes)
+> [Clean ABAP](#clean-abap) > [Content](#content) > [Testing](#testing) > [Code Under Test](#code-under-test) > [This section](#test-against-interfaces-not-implementations)
 
 A practical consequence of the [_Test publics, not private internals_](#test-publics-not-private-internals),
 type your code under test with an _interface_
