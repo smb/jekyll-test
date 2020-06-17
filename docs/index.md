@@ -1,10 +1,12 @@
 # Clean ABAP
 
-<!-- Once the translations are available, we will add in the following link bar. -->
-<!-- > [English](CleanABAP.md)&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp; -->
-<!-- [Chinese](CleanABAP_fr_FR.md)&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp; -->
-<!-- [French](CleanABAP_fr_FR.md)&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp; -->
-<!-- [German](CleanABAP_fr_FR.md) -->
+> [**English**](CleanABAP.md)
+> &nbsp;·&nbsp;
+> [文言](CleanABAP_zh.md)
+> &nbsp;·&nbsp;
+> [Français](CleanABAP_fr.md)
+> &nbsp;·&nbsp;
+> [Deutsch](CleanABAP_de.md)
 
 This guide is an adoption of
 [Robert C. Martin's _Clean Code_]
@@ -13,12 +15,6 @@ for [ABAP](https://en.wikipedia.org/wiki/ABAP).
 The [Cheat Sheet](cheat-sheet/CheatSheet.md) is a print-optimized version.
 
 [Robert C. Martin's _Clean Code_]: https://www.oreilly.com/library/view/clean-code/9780136083238/
-
-
-<!-- @Translators: kindly add the following disclaimer to the document. -->
-<!-- > This is a snapshot translation of the [English version from 14 Nov 2019](). -->
-<!-- > Kindly refer to the [current English version](CleanABAP.md) for the most recent information. -->
-<!-- > Please post issues and pull requests in English to simplify communication with the community. -->
 
 ## Content
 
@@ -678,7 +674,8 @@ result = VALUE #( FOR row IN input ( row-text ) ).
 "  INSERT row-text INTO TABLE result.
 " ENDLOOP.
 
-DATA(line) = value_pairs[ name = 'A' ].
+DATA(line) = value_pairs[ name = 'A' ]. " entry must exist
+DATA(line) = VALUE #( value_pairs[ name = 'A' ] OPTIONAL ). " entry can be missing
 " READ TABLE value_pairs INTO DATA(line) WITH KEY name = 'A'.
 
 DATA(exists) = xsdbool( line_exists( value_pairs[ name = 'A' ] ) ).
@@ -1169,7 +1166,7 @@ the main control flow with a double read
 " anti-pattern
 IF NOT line_exists( my_table[ key = input ] ).
   RAISE EXCEPTION NEW /clean/my_data_not_found( ).
-ENDTRY.
+ENDIF.
 DATA(row) = my_table[ key = input ].
 ```
 
@@ -4181,13 +4178,17 @@ They will in fact have imaginary > 100% coverage.
 
 > [Clean ABAP](#clean-abap) > [Content](#content) > [Testing](#testing) > [Test Classes](#test-classes) > [This section](#call-local-test-classes-by-their-purpose)
 
+Name local test classes either by the "when" part of the story
+
 ```ABAP
-CLASS ltc_unit_tests DEFINITION FOR TESTING ... .
-CLASS ltc_integration_tests DEFINITION FOR TESTING ... .
-CLASS ltc_unit_tests_with_mocks DEFINITION FOR TESTING ... .
+CLASS ltc_<public method name> DEFINITION FOR TESTING ... ."
 ```
 
-Good names reveal the level of the tests and what's common to their setup.
+or the "given" part of the story
+
+```ABAP
+CLASS ltc_<common setup semantics> DEFINITION FOR TESTING ... .
+```
 
 ```ABAP
 " anti-patterns
@@ -4470,7 +4471,7 @@ without interfering with the rest of the system.
 > [Clean ABAP](#clean-abap) > [Content](#content) > [Testing](#testing) > [Injection](#injection) > [This section](#use-test-seams-as-temporary-workaround)
 
 If all other techniques fail, or when in dangerous shallow waters of legacy code,
-refrain to [test seams](https://help.sap.com/doc/abapdocu_751_index_htm/7.51/en-US/index.htm?file=abendyn_access_data_obj_guidl.htm)
+refrain to [test seams](https://help.sap.com/doc/abapdocu_751_index_htm/7.51/en-US/index.htm?file=abaptest-seam.htm)
 to make things testable.
 
 Although they look comfortable at first sight, test seams are invasive and tend to get entangled
